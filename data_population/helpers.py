@@ -1,10 +1,9 @@
 import os
 import gspread
-import pandas as pd
 
-def get_sheet_data_as_json(sheet_name, base_dir, json_file_name):
+def get_sheet_data_as_dict(sheet_name : str, relative_path: str) -> dict:
     # Construct the full path to the JSON file using os.path.join()
-    json_file_path = os.path.join(base_dir, json_file_name)
+    json_file_path =  os.path.join(os.path.abspath('.'), relative_path)
 
     try:
         # Authenticate with Google Sheets using the full path
@@ -16,13 +15,8 @@ def get_sheet_data_as_json(sheet_name, base_dir, json_file_name):
         # Access the specified worksheet
         worksheet = sh.worksheet(sheet_name)
 
-        # Convert the worksheet data to a DataFrame
-        df = pd.DataFrame(worksheet.get_all_records())
-
-        # Convert the DataFrame to JSON
-        json_data = df.to_json(orient='records')
-
-        return json_data
+        # Return data as dict
+        return worksheet.get_all_records()
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
