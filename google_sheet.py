@@ -1,5 +1,5 @@
 import gspread
-from catalog.models import Recipe
+# from catalog.models import Recipe
 
 # Authenticate with Google Sheets
 gc = gspread.service_account(filename='recipeapp.json')
