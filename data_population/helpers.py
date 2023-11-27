@@ -2,12 +2,9 @@ import os
 import gspread
 import pandas as pd
 
-def get_sheet_data_as_json(sheet_name):
-    # Specify the directory where the JSON file is located
-    base_dir = '/home/tom/code/kopdarbiba/recipe_app_backend/data_population/'
-
+def get_sheet_data_as_json(sheet_name, base_dir, json_file_name):
     # Construct the full path to the JSON file using os.path.join()
-    json_file_path = os.path.join(base_dir, 'recipeapp.json')
+    json_file_path = os.path.join(base_dir, json_file_name)
 
     try:
         # Authenticate with Google Sheets using the full path
