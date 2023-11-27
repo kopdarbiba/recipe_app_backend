@@ -1,3 +1,5 @@
 from django.contrib import admin
 
-# Register your models here.
+from data_population.models import Ingridient
+
+admin.site.register(Ingridient)

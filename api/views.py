@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.forms.models import model_to_dict
 from django.shortcuts import get_object_or_404
 from catalog.models import Recipe  # Import your Recipe model
+from data_population.models import Ingridient
 
 def api_home(request):
     # Example http://127.0.0.1:8000/api/?recipe_id=2
