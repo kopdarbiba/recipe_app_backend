@@ -11,7 +11,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         # Example usage:
-        sheet_name = 'ingridient'
+        # sheet_name = 'ingridient'
+        sheet_name = 'RecipeData'
         relative_key_path = 'data_population/recipeapp.json'
 
         sheet_data_dict = get_sheet_data_as_dict(sheet_name, relative_key_path)
@@ -21,4 +22,4 @@ class Command(BaseCommand):
         else:
             db_populate(sheet_data_dict)
 
-        self.stdout.write(self.style.SUCCESS('Ingridient objects have been successfully created and saved.'))
+        self.stdout.write(self.style.SUCCESS(f'{sheet_name} objects have been successfully created and saved.'))
