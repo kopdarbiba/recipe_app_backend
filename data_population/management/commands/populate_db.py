@@ -1,12 +1,10 @@
 from data_population.helpers import get_sheet_data_as_dict
+from data_population.manage_sheet_data import db_populate
 from data_population.models import Ingridient
 from django.core.management.base import BaseCommand
 
 
-def db_populate(sheet_data_dict: dict) -> None:
-    for row in sheet_data_dict:
-        ingredient = Ingridient(title=row['title'], nosaukums=row['nosaukums'], calories=row['calories'])
-        ingredient.save()
+
 
 class Command(BaseCommand):
     help = 'Populate Ingridient objects'
