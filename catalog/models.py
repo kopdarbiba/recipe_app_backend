@@ -1,26 +1,47 @@
 from django.db import models
 
 class Cuisine(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
 
 class Meal(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
 
 class Equipment(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
 
 class Unit(models.Model):
-    name = models.CharField(max_length=50, unique=True)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
 
 class Allergen(models.Model):
-    name = models.CharField(max_length=255, unique=True)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
+
+class DietaryPreference(models.Model):
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
+
+class IngredientCategory(models.Model):
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-    is_allergen = models.BooleanField(default=False)
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
     allergens = models.ManyToManyField(Allergen, blank=True)
     units = models.ManyToManyField(Unit, blank=True)
-    calories = models.PositiveIntegerField()  # Calories per unit of the ingredient
+    category = models.ForeignKey(IngredientCategory, on_delete=models.SET_NULL, null=True)
 
 class Recipe(models.Model):
     title = models.CharField(max_length=255)
@@ -31,7 +52,7 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     servings = models.PositiveIntegerField()
     instructions = models.TextField()
-    dietary_preferences = models.ManyToManyField('DietaryPreference')
+    dietary_preferences = models.ManyToManyField(DietaryPreference)
     nutritional_information = models.JSONField()
     ingredient_substitutes = models.ManyToManyField(Ingredient, related_name='substitutes', blank=True)
 
@@ -41,9 +62,7 @@ class RecipeIngredient(models.Model):
     quantity = models.CharField(max_length=50)
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
 
-class DietaryPreference(models.Model):
-    name = models.CharField(max_length=255, unique=True)
-
+    
 # class UserIngredient(models.Model):
 #     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Assuming you have a User model
 #     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
