@@ -16,5 +16,4 @@ def api_home(request):
             data = {'error': 'Invalid recipe ID'}
     else:
         data = {'error': 'Recipe ID not provided in the request'}
-
     return JsonResponse(data)

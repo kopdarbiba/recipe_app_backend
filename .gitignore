@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 data_population/recipeapp.json
 db.sqlite3
+creds.json

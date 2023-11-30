@@ -8,22 +8,23 @@ class Command(BaseCommand):
     help = 'Populate Ingridient objects'
 
     def handle(self, *args, **options):
-        db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category']
-        relative_key_path = 'catalog/management/commands/recipeapp.json'
-        for table in db_table_list:
-            sheet_data_dict = get_sheet_data_as_dict(table, relative_key_path)
+        db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category'] # Add table names
+        relative_key_path = 'catalog\\management\\commands\\recipeapp.json' 
+        #relative_key_path = 'catalog\management\commands\recipeapp.json' # Single backslash for Linux
+        for table_name in db_table_list:
+            sheet_data_list_of_dict = get_sheet_data_as_list_of_dict(table_name, relative_key_path)
 
-            if sheet_data_dict is None:
+            if sheet_data_list_of_dict is None:
                 print("Failed to retrieve sheet data.")
             else:
-                db_populate(table, sheet_data_dict)
-                self.stdout.write(self.style.SUCCESS(f'table {table} have been successfully created and saved.'))
+                db_populate(table_name, sheet_data_list_of_dict)
+                self.stdout.write(self.style.SUCCESS(f'table {table_name} have been successfully created and saved.'))
                 
         self.stdout.write(self.style.SUCCESS(f'objects have been successfully created and saved.'))
 
 
 
-def get_sheet_data_as_dict(sheet_name : str, relative_path: str) -> dict:
+def get_sheet_data_as_list_of_dict(table_name : str, relative_path: str) -> list[dict]: # Typehint for list of dictionaries
     # Construct the full path to the JSON file using os.path.join()
     json_file_path =  os.path.join(os.path.abspath('.'), relative_path)
 
@@ -32,13 +33,13 @@ def get_sheet_data_as_dict(sheet_name : str, relative_path: str) -> dict:
         gc = gspread.service_account(filename=json_file_path)
 
         # Open the Google Sheet by name
-        sh = gc.open('recipe_db')
+        sh = gc.open('recipe_db') # Insert Google Sheet name as a global variable
 
         # Access the specified worksheet
-        worksheet = sh.worksheet(sheet_name)
-
+        worksheet = sh.worksheet(table_name)
+    
         # Return data as dict
-        return worksheet.get_all_records()
+        return worksheet.get_all_records() 
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
