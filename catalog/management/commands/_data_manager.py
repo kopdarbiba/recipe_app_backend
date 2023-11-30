@@ -13,6 +13,8 @@ table_to_model = {
     'ingredient_category': IngredientCategory,
 }
 
+unique_field_name = 'name_eng'
+
 def db_populate(table_name: str, sheet_data_dict: dict) -> None:
     for GS_row in sheet_data_dict:
         # Check GS data. Convert empty strings to None in the row dictionary
@@ -30,7 +32,7 @@ def populate_database(table_name, GS_row):
 
     try:
         # Try to get an existing database entry based on a unique field
-        db_entry = model_class.objects.get(name_eng=GS_row['name_eng'])
+        db_entry = model_class.objects.get(name_eng=GS_row[unique_field_name])
 
         # Iterate through keys in GS_row (assuming they correspond to model fields)
         for key in GS_row:
