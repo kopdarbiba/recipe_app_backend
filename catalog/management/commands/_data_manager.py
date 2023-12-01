@@ -15,16 +15,25 @@ table_to_model = {
 
 unique_field_name = 'name_eng'
 
-def db_populate(table_name: str, sheet_data_list_of_dict: list[dict]) -> None:
-    model_class = table_to_model[table_name]
-
+def manage_db_populate(table_name: str, sheet_data_list_of_dict: list[dict]) -> None:
+    model_class = table_to_model[table_name] # Unit, DietaryPreference, .....
+    unique_values_checklist = set(model_class.objects.values_list(unique_field_name, flat=True))
+    
     for GS_row in sheet_data_list_of_dict:
-        # Check GS data. Convert empty strings to None in the row dictionary
-        for field_name, value in GS_row.items():
-            if value == '':
-                GS_row[field_name] = None
-        populate_database(model_class, GS_row)
+        # Remove the updated value from the checklist
+        unique_values_checklist.discard(GS_row[unique_field_name])
 
+        check_worksheet_row(GS_row)
+        populate_database(model_class, GS_row)
+    
+    # print(unique_values_checklist)
+    if unique_values_checklist:
+        for value_to_delete in unique_values_checklist:
+            # Delete entries in the database based on the unique values in the set
+            model_class.objects.filter(name_eng=value_to_delete).delete()
+
+        # After the deletion, clear the set since all entries have been deleted
+        unique_values_checklist.clear()
 
 
 # Function to handle database population
@@ -50,8 +59,58 @@ def populate_database(model_class, GS_row: dict) -> None:
 
     except model_class.DoesNotExist:
         # If the entry doesn't exist, create a new one using GS_row data
-        model_instance = model_class(**GS_row)
-        model_instance.save()
+        create_new_row_in_db(model_class, GS_row)
+
+
+def check_worksheet_row(row: dict) -> None:
+    for field_name, value in row.items():
+        if value == '' or None:
+            row[field_name] = row[unique_field_name]
+
+def create_new_row_in_db(all_model_objects: models, row: dict) -> None:
+    print(all_model_objects, row)
+    model_instance = all_model_objects(**row)
+    model_instance.save()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

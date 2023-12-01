@@ -2,14 +2,14 @@ import os
 from decouple import config
 import gspread
 from django.core.management.base import BaseCommand
-from catalog.management.commands._data_manager import db_populate
+from catalog.management.commands._data_manager import manage_db_populate
 
 
 class Command(BaseCommand):
     help = 'Populate Ingridient objects'
 
     def handle(self, *args, **options):
-        db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category'] # Add table names
+        db_table_list = ['unit']#, 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category'] # Add table names
         relative_key_path = config('RELATIVE_KEY_PATH')
         
         for table_name in db_table_list:
@@ -18,7 +18,7 @@ class Command(BaseCommand):
             if sheet_data_list_of_dict is None:
                 print("Failed to retrieve sheet data.")
             else:
-                db_populate(table_name, sheet_data_list_of_dict)
+                manage_db_populate(table_name, sheet_data_list_of_dict)
                 self.stdout.write(self.style.SUCCESS(f'table {table_name} have been successfully created and saved.'))
                 
         self.stdout.write(self.style.SUCCESS(f'objects have been successfully created and saved.'))
