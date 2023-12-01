@@ -16,19 +16,19 @@ table_to_model = {
 unique_field_name = 'name_eng'
 
 def db_populate(table_name: str, sheet_data_list_of_dict: list[dict]) -> None:
+    model_class = table_to_model[table_name]
+
     for GS_row in sheet_data_list_of_dict:
         # Check GS data. Convert empty strings to None in the row dictionary
         for field_name, value in GS_row.items():
             if value == '':
                 GS_row[field_name] = None
-        populate_database(table_name, GS_row)
+        populate_database(model_class, GS_row)
 
 
 
 # Function to handle database population
-def populate_database(table_name: str, GS_row: dict) -> None:
-    # Move model_class definition outside the try-except block
-    model_class = table_to_model[table_name]
+def populate_database(model_class, GS_row: dict) -> None:
 
     try:
         # Try to get an existing database entry based on a unique field

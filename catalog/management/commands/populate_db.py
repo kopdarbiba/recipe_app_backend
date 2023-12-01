@@ -1,4 +1,5 @@
 import os
+from decouple import config
 import gspread
 from django.core.management.base import BaseCommand
 from catalog.management.commands._data_manager import db_populate
@@ -9,8 +10,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category'] # Add table names
-        relative_key_path = 'catalog\\management\\commands\\recipeapp.json' 
-        #relative_key_path = 'catalog\management\commands\recipeapp.json' # Single backslash for Linux
+        relative_key_path = config('RELATIVE_KEY_PATH')
+        
         for table_name in db_table_list:
             sheet_data_list_of_dict = get_sheet_data_as_list_of_dict(table_name, relative_key_path)
 
