@@ -16,7 +16,6 @@ class Meal(models.Model):
     def __str__(self) -> str:
         return f"{self.name_eng}"
 
-
 class Equipment(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
@@ -40,7 +39,6 @@ class Allergen(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name_eng}"
-
 
 class DietaryPreference(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
