@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Populate Ingridient objects'
 
     def handle(self, *args, **options):
-        db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient', 'ingredient_category'] # Add table names
+        db_table_list = ['unit', 'dietarypreference', 'allergen', 'equipment', 'meal', 'cuisine', 'ingredient_category', 'ingredient' ] # Add table names
         relative_key_path = config('RELATIVE_KEY_PATH')
         
         for table_name in db_table_list:
