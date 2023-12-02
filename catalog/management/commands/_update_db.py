@@ -30,7 +30,6 @@ def update_db(table_name: str, sheet_data_list_of_dict: list[dict]) -> None:
     manage_delete(model_class, unique_values_checklist)
 
 def check_worksheet_row(row: dict) -> None:
-    # UNIQUE_FIELD_NAME = 'name_eng'  # Assuming this constant is defined somewhere
 
     for field_name, value in row.items():
         # Check if the value is empty or None and the field is not one of the specified fields
