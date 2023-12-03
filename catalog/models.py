@@ -83,6 +83,14 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.title}"
 
+    # @property
+    # def xl_servings(self):
+    #     return "%.2f" %(float(self.servings) * 0.5)
+    
+    # def get_discount(self):
+    #     return "qweqweqweqe"
+
+
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
