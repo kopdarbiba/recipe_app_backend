@@ -69,15 +69,17 @@ class Ingredient(models.Model):
 
 class Recipe(models.Model):
     title = models.CharField(max_length=255)
-    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
-    cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
-    meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()  # in minutes
-    equipment = models.ManyToManyField(Equipment)
     servings = models.PositiveIntegerField()
     instructions = models.TextField()
-    dietary_preferences = models.ManyToManyField(DietaryPreference)
     nutritional_information = models.JSONField()
+    
+    cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
+    meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
+
+    equipment = models.ManyToManyField(Equipment)
+    dietary_preferences = models.ManyToManyField(DietaryPreference)
+    ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     ingredient_substitutes = models.ManyToManyField(Ingredient, related_name='substitutes', blank=True)
 
     def __str__(self) -> str:
