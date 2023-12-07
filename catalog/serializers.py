@@ -19,7 +19,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cuisine',
             'ingredients',
             'servings',
-            'instructions',
+            'description',
             'nutritional_information',
             'cooking_time',
         ]

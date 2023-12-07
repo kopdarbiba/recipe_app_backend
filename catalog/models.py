@@ -71,7 +71,7 @@ class Recipe(models.Model):
     title = models.CharField(max_length=255)
     cooking_time = models.PositiveIntegerField()  # in minutes
     servings = models.PositiveIntegerField()
-    instructions = models.TextField()
+    description = models.TextField()
     nutritional_information = models.JSONField()
     
     cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
@@ -85,14 +85,6 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.title}"
 
-    # @property
-    # def xl_servings(self):
-    #     return "%.2f" %(float(self.servings) * 0.5)
-    
-    # def get_discount(self):
-    #     return "qweqweqweqe"
-
-
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
@@ -102,7 +94,10 @@ class RecipeIngredient(models.Model):
     def __str__(self) -> str:
         return f"{self.name_eng}"
 
-    
-# class UserIngredient(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Assuming you have a User model
-#     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+class CookingStep(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    step_number = models.PositiveIntegerField()
+    description = models.TextField()
+
+    def __str__(self) -> str:
+        return f"Step {self.step_number} for {self.recipe.title}"

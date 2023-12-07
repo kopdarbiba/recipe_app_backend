@@ -10,4 +10,4 @@ admin.site.register(Unit)
 admin.site.register(Allergen)
 admin.site.register(Ingredient)
 admin.site.register(RecipeIngredient)
-
+admin.site.register(CookingStep)
