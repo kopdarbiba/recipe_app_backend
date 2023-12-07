@@ -66,6 +66,14 @@ class Ingredient(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name_eng}"
+    
+class CookingMethod(models.Model):
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng}"
 
 class Recipe(models.Model):
     title = models.CharField(max_length=255)
@@ -81,6 +89,7 @@ class Recipe(models.Model):
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     ingredients = models.ManyToManyField(Ingredient, through='RecipeIngredient')
     ingredient_substitutes = models.ManyToManyField(Ingredient, related_name='substitutes', blank=True)
+    cooking_methods = models.ManyToManyField(CookingMethod)
 
     def __str__(self) -> str:
         return f"{self.title}"

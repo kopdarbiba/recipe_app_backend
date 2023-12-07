@@ -11,6 +11,7 @@ table_to_model = {
     'cuisine': Cuisine,
     'ingredient': Ingredient,
     'ingredient_category': IngredientCategory,
+    'cooking_method': CookingMethod
 }
 
 UNIQUE_FIELD_NAME = 'name_eng'

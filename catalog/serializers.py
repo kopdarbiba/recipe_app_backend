@@ -6,8 +6,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     cuisine = serializers.SerializerMethodField()
     meal = serializers.SerializerMethodField()
     dietary_preferences = serializers.SerializerMethodField()
-    equipments = serializers.SerializerMethodField()    
-
+    equipments = serializers.SerializerMethodField()
+    cooking_methods = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -22,7 +22,24 @@ class RecipeSerializer(serializers.ModelSerializer):
             'description',
             'nutritional_information',
             'cooking_time',
+            'cooking_methods',
         ]
+
+
+    def get_cooking_methods(self, obj):
+        cooking_methods = obj.cooking_methods.all()
+        cooking_methods_info = []
+        for method in cooking_methods:
+            method_info = {
+                'id': method.id,
+                'name_eng': method.name_eng,
+                'name_lv': method.name_lv,
+                'name_rus': method.name_rus
+            }
+            cooking_methods_info.append(method_info)
+
+        return {'equipment': cooking_methods_info}
+
 
 
     def get_equipments(self, obj):
