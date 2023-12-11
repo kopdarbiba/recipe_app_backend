@@ -1,8 +1,12 @@
 from django.contrib import admin
 
-from recipe_info.models import RecipeGeneralInfo
+from recipe_info.models import RecipeGenInfo
 
-# Register your models here.
+admin.site.register(RecipeGenInfo)
 
 
-admin.site.register(RecipeGeneralInfo)
+
+
+
+
+

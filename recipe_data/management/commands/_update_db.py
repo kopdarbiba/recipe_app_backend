@@ -1,14 +1,15 @@
-from catalog.models import *
+from recipe_info.models import Meal, Cuisine, DietaryPreference, Equipment
+from recipe_data.models import Unit, Allergen, Ingredient, IngredientCategory, CookingMethod
 
 
 # Define a dictionary to map table names to model classes
 table_to_model = {
-    'unit': Unit,
-    'dietarypreference': DietaryPreference,
-    'allergen': Allergen,
-    'equipment': Equipment,
     'meal': Meal,
     'cuisine': Cuisine,
+    'dietarypreference': DietaryPreference,
+    'equipment': Equipment,
+    'unit': Unit,
+    'allergen': Allergen,
     'ingredient': Ingredient,
     'ingredient_category': IngredientCategory,
     'cooking_method': CookingMethod
@@ -38,7 +39,7 @@ def check_worksheet_row(row: dict) -> None:
             row[field_name] = row[UNIQUE_FIELD_NAME]
 
 
-def manage_create_update(model_class: models, GS_row: dict) -> None:
+def manage_create_update(model_class, GS_row: dict) -> None:
     # Try to get an existing database entry based on a unique field
     instance, created = model_class.objects.get_or_create(name_eng=GS_row[UNIQUE_FIELD_NAME], defaults=GS_row)
 
@@ -50,7 +51,7 @@ def manage_create_update(model_class: models, GS_row: dict) -> None:
         # Save the updated entry to the database
         instance.save()
 
-def manage_delete(model_class: models, unique_values_checklist: set) -> None:
+def manage_delete(model_class, unique_values_checklist: set) -> None:
     # If any value left in set(), means this entry was deleted from GS worksheet    
     if unique_values_checklist:
         for value_to_delete in unique_values_checklist:

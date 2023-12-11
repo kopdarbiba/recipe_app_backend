@@ -1,7 +1,8 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-# from catalog.models import Recipe
+
+# from recipe_info.models import RecipeGeneralInfo
 # from catalog.serializers import RecipeSerializer
 
 @api_view(['GET'])

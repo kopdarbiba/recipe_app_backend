@@ -2,7 +2,7 @@ import os
 from decouple import config
 import gspread
 from django.core.management.base import BaseCommand
-from catalog.management.commands._update_db import update_db
+from recipe_data.management.commands._update_db import update_db
 
 
 class Command(BaseCommand):

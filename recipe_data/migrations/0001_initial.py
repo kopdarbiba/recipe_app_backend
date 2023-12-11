@@ -9,11 +9,12 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
+        ('recipe_info', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Cuisine',
+            name='Allergen',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name_eng', models.CharField(max_length=255, unique=True)),
@@ -22,7 +23,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='DietaryPreference',
+            name='CookingMethod',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name_eng', models.CharField(max_length=255, unique=True)),
@@ -31,7 +32,17 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Equipment',
+            name='Ingredient',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('name_eng', models.CharField(max_length=255, unique=True)),
+                ('name_lv', models.CharField(max_length=255, unique=True)),
+                ('name_rus', models.CharField(max_length=255, unique=True)),
+                ('allergen', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_data.allergen')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='IngredientCategory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name_eng', models.CharField(max_length=255, unique=True)),
@@ -40,7 +51,14 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='Meal',
+            name='RecipeData',
+            fields=[
+                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('recipe', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_info.recipegeninfo')),
+            ],
+        ),
+        migrations.CreateModel(
+            name='Unit',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name_eng', models.CharField(max_length=255, unique=True)),
@@ -49,18 +67,19 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='RecipeGenInfo',
+            name='SelectedIngredient',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.CharField(max_length=255)),
-                ('cooking_time', models.PositiveIntegerField()),
-                ('servings', models.PositiveIntegerField()),
-                ('description', models.TextField()),
-                ('nutritional_information', models.JSONField(default=dict)),
-                ('cuisine', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_info.cuisine')),
-                ('dietary_preferences', models.ManyToManyField(to='recipe_info.dietarypreference')),
-                ('equipment', models.ManyToManyField(to='recipe_info.equipment')),
-                ('meal', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_info.meal')),
+                ('unit_count', models.FloatField(null=True)),
+                ('cooking_method', models.ManyToManyField(to='recipe_data.cookingmethod')),
+                ('ingredient', models.ManyToManyField(to='recipe_data.ingredient')),
+                ('recipe_data', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_data.recipedata')),
+                ('unit', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_data.unit')),
             ],
+        ),
+        migrations.AddField(
+            model_name='ingredient',
+            name='category',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='recipe_data.ingredientcategory'),
         ),
     ]
