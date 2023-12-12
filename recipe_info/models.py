@@ -49,6 +49,7 @@ class Allergen(models.Model):
         return f"{self.name_eng}"
     
 class Ingredient(models.Model):
+    # Add price field. Need to find solution to create relation with unit table also
     allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(IngredientCategory, on_delete=models.SET_NULL, null=True)
 
@@ -70,7 +71,6 @@ class RecipeGenInfo(models.Model):
     servings = models.PositiveIntegerField()
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
-    # ingredients = models.ManyToManyField(Ingredient)
     # nutritional_information = models.JSONField(default=dict)
     
     def __str__(self) -> str:

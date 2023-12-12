@@ -1,10 +1,6 @@
 from django.contrib import admin
 from .models import RecipeGenInfo, RecipeIngredient, Unit
 
-
-from django.contrib import admin
-from .models import RecipeGenInfo, RecipeIngredient, Unit
-
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
@@ -17,8 +13,6 @@ class RecipeIngredientInline(admin.TabularInline):
 class RecipeGenInfoAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
 admin.site.register(RecipeGenInfo, RecipeGenInfoAdmin)
-
-
 
 
 class UnitAdmin(admin.ModelAdmin):
