@@ -1,5 +1,5 @@
-from recipe_info.models import Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory
-from recipe_data.models import Unit, CookingMethod
+from recipe_info.models import Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory, Unit
+from recipe_data.models import CookingMethod
 
 
 # Define a dictionary to map table names to model classes
