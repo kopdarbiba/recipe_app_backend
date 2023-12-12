@@ -3,10 +3,6 @@ from django.db import models
 from recipe_info.models import RecipeGenInfo
 
 
-
-
-
-
 class CookingMethod(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
