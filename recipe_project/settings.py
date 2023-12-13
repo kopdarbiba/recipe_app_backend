@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'api',
     'recipe_info',
-    'recipe_data',
     'recipe_constructor',
 ]
 

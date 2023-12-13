@@ -47,6 +47,14 @@ class Allergen(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name_eng}"
+
+class CookingMethod(models.Model):
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng}"
     
 class Ingredient(models.Model):
     # Add price field. Need to find solution to create relation with unit table also
@@ -71,6 +79,7 @@ class RecipeGenInfo(models.Model):
     servings = models.PositiveIntegerField()
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
+    cooking_method = models.ManyToManyField(CookingMethod, through='RecipeCookingMethod')
     # nutritional_information = models.JSONField(default=dict)
     
     def __str__(self) -> str:
@@ -92,3 +101,8 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}"
+
+class RecipeCookingMethod(models.Model):
+    recipe_data = models.ForeignKey(RecipeGenInfo, on_delete=models.CASCADE)
+    cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
+    unit_count = models.FloatField(null=True)
