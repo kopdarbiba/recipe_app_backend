@@ -1,5 +1,21 @@
 from django.db import models
 
+class Title(models.Model):
+    name_eng = models.CharField(max_length=255)
+    #name_lv = models.CharField(max_length=255, null=True)
+    #name_rus = models.CharField(max_length=255, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng}"
+
+class Description(models.Model):
+    name_eng = models.TextField(max_length=3000)
+    #name_lv = models.TextField(max_length=3000, null=True)
+    #name_rus = models.TextField(max_length=3000, null=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng}"
+
 class Cuisine(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
@@ -84,15 +100,16 @@ class Recipe(models.Model):
     # instruction_steps
 
 class GenInfo(models.Model):
-    recipe = models.ForeignKey(Recipe)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
+    #recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True)
+    title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
+    description = models.ForeignKey(Description, on_delete=models.SET_NULL, null=True)
     cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
     meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()
     servings = models.PositiveIntegerField()
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
+    cooking_method = models.ManyToManyField(CookingMethod)
     
     def __str__(self) -> str:
         return f"{self.title}"
@@ -104,4 +121,13 @@ class RecipeIngredient(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}"
+        return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}" 
+
+class RecipeCookingMethod(models.Model):
+    recipe = models.ForeignKey(GenInfo, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.recipe} {self.ingredient} of {self.cooking_method}"
+    

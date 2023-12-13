@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import GenInfo, RecipeIngredient, Unit
+from .models import GenInfo, RecipeIngredient, Unit, Title, Description, RecipeCookingMethod, Ingredient, CookingMethod
 from .models import Recipe
 
 # Manage unit type boolean values
@@ -19,19 +19,34 @@ class RecipeIngredientInline(admin.TabularInline):
 # Modify general info form, adding ingredient selector at botom
 class RecipeGenInfoAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
+    list_filter = ('dietary_preferences', 'equipment', 'cooking_method')
+    filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_method')
+    
+
+class RecipeCookingMethodInLine(admin.TabularInline):
+    model = RecipeCookingMethod
+    extra = 1
 
 
+admin.site.register(Title)
+admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(GenInfo, RecipeGenInfoAdmin)
 
 ###########################################################################################################################
 
-class GenInfoInline(admin.TabularInline):
-    model = GenInfo
-    extra = 1
+class RecipeCookingMethodAdmin(admin.ModelAdmin): # New page and lists fields (delete later)
+    list_display = ["ingredient", "recipe", "cooking_method"]
 
-class RecipeAdmin(admin.ModelAdmin):
-    inline = [GenInfoInline]
+admin.site.register(RecipeCookingMethod, RecipeCookingMethodAdmin)
 
-admin.site.register(Recipe, RecipeAdmin)
+
+# class GenInfoInline(admin.TabularInline):
+#     model = GenInfo
+#     extra = 1
+
+# class RecipeAdmin(admin.ModelAdmin):
+#     inline = [GenInfoInline]
+
+# admin.site.register(Recipe, RecipeAdmin)
 
