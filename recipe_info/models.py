@@ -16,8 +16,6 @@ class Description(models.Model):
     def __str__(self) -> str:
         return f"{self.name_eng}"
 
-
-
 class Cuisine(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
@@ -90,6 +88,7 @@ class Ingredient(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
     name_rus = models.CharField(max_length=255, unique=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
 
     def __str__(self) -> str:
         return f"{self.name_eng}"
@@ -108,7 +107,6 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"{self.title}"
 
-
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
@@ -118,11 +116,9 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}" 
 
-class RecipeCookingMethod(models.Model):
+class IngredientCookingMethod(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return f"{self.recipe} {self.ingredient} of {self.cooking_method}"
-    
+    cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=5, decimal_places=2)
+    unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
