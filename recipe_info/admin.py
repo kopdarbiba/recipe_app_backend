@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import GenInfo, RecipeIngredient, Unit, Title, Description, RecipeCookingMethod, Ingredient, CookingMethod
-from .models import Recipe
+from .models import Recipe, RecipeIngredient, Unit, Title, Description, RecipeCookingMethod, Ingredient, CookingMethod
 
 
 
@@ -20,7 +19,7 @@ class RecipeIngredientInline(admin.TabularInline):
 
 
 # Modify general info form, adding ingredient selector at botom
-class RecipeGenInfoAdmin(admin.ModelAdmin):
+class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline]
 
     # Filters for each field
@@ -32,7 +31,7 @@ class RecipeGenInfoAdmin(admin.ModelAdmin):
 admin.site.register(Title)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
-admin.site.register(GenInfo, RecipeGenInfoAdmin)
+admin.site.register(Recipe, RecipeAdmin)
 
 ###########################################################################################################################
 
@@ -44,14 +43,3 @@ class RecipeCookingMethodAdmin(admin.ModelAdmin): # New page and lists fields (d
     list_display = ["ingredient", "recipe", "cooking_method"]
 
 admin.site.register(RecipeCookingMethod, RecipeCookingMethodAdmin)
-
-
-# class GenInfoInline(admin.TabularInline):
-#     model = GenInfo
-#     extra = 1
-
-# class RecipeAdmin(admin.ModelAdmin):
-#     inline = [GenInfoInline]
-
-# admin.site.register(Recipe, RecipeAdmin)
-

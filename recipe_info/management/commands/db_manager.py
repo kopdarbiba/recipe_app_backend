@@ -19,9 +19,9 @@ class Command(BaseCommand):
                 print("Failed to retrieve sheet data.")
             else:
                 update_db(table_name, sheet_data_list_of_dict)
-                self.stdout.write(self.style.SUCCESS(f'table {table_name} have been successfully created and saved.'))
+                self.stdout.write(self.style.SUCCESS(f'table {table_name} have been successfully synchronized.'))
                 
-        self.stdout.write(self.style.SUCCESS(f'objects have been successfully created and saved.'))
+        self.stdout.write(self.style.SUCCESS(f'objects have been successfully synchronized.'))
 
 
 

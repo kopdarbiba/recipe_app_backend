@@ -95,13 +95,6 @@ class Ingredient(models.Model):
         return f"{self.name_eng}"
     
 class Recipe(models.Model):
-    ...
-    # gen_info
-    # ingredient
-    # cooking_method
-    # instruction_steps
-
-class GenInfo(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
     description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
     cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
@@ -117,7 +110,7 @@ class GenInfo(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(GenInfo, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=5, decimal_places=2)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
@@ -126,7 +119,7 @@ class RecipeIngredient(models.Model):
         return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}" 
 
 class RecipeCookingMethod(models.Model):
-    recipe = models.ForeignKey(GenInfo, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE, null=True)
 
