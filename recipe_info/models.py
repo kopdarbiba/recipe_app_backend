@@ -9,12 +9,14 @@ class Title(models.Model):
         return f"{self.name_eng}"
 
 class Description(models.Model):
-    name_eng = models.TextField(max_length=3000)
+    name_eng = models.TextField()
     #name_lv = models.TextField(max_length=3000, null=True)
     #name_rus = models.TextField(max_length=3000, null=True)
 
     def __str__(self) -> str:
         return f"{self.name_eng}"
+
+
 
 class Cuisine(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -100,9 +102,8 @@ class Recipe(models.Model):
     # instruction_steps
 
 class GenInfo(models.Model):
-    #recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL, null=True)
-    title = models.ForeignKey(Title, on_delete=models.SET_NULL, null=True)
-    description = models.ForeignKey(Description, on_delete=models.SET_NULL, null=True)
+    title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
+    description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
     cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
     meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()
@@ -113,6 +114,7 @@ class GenInfo(models.Model):
     
     def __str__(self) -> str:
         return f"{self.title}"
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(GenInfo, on_delete=models.CASCADE)
