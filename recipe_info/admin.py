@@ -1,37 +1,11 @@
 from django.contrib import admin
 from django.db.models import Q
 from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient
-from .models import CookingSteps
+from .models import CookingStep
 
 # Manage unit type boolean values
 class UnitAdmin(admin.ModelAdmin):
     list_display = ["name_lv", "type_shoping_valid"]
-
-class IngredientCookingMethodInline(admin.TabularInline):
-    model = CookingSteps
-    extra = 1
-    classes = ["collapse"]
-
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-            if db_field.name == "ingredient":
-                # Check if the recipe is being added (not saved yet)
-                if "add" in request.path:
-                    kwargs["queryset"] = Ingredient.objects.none()
-                else:
-                    # Filter ingredients based on the recipe ID
-                    recipe_id = request.resolver_match.kwargs.get("object_id")
-                    kwargs["queryset"] = Ingredient.objects.filter(recipeingredient__recipe=recipe_id)
-
-            if db_field.name == "cooking_method":
-                # Check if the recipe is being added (not saved yet)
-                if "add" in request.path:
-                    kwargs["queryset"] = CookingMethod.objects.none()
-                else:
-                    # Filter cooking methods based on the recipe ID
-                    recipe_id = request.resolver_match.kwargs.get("object_id")
-                    kwargs["queryset"] = Recipe.objects.get(pk=recipe_id).cooking_method.all()
-
-            return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 # Ingredient selector at botmom of general info form. 
 class RecipeIngredientInline(admin.TabularInline):
@@ -44,19 +18,49 @@ class RecipeIngredientInline(admin.TabularInline):
             kwargs["queryset"] = Unit.objects.filter(type_shoping_valid=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
+# TODO
+class CookingStepsMethodInline(admin.TabularInline):
+    model = CookingStep
+    extra = 1
+    classes = ["collapse"]
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "cooking_method":
+            # Check if the recipe is being added (not saved yet)
+            if "add" in request.path:
+                kwargs["queryset"] = CookingMethod.objects.none()
+            else:
+                # Filter cooking methods based on the recipe ID
+                recipe_id = request.resolver_match.kwargs.get("object_id")
+                recipe = Recipe.objects.get(pk=recipe_id)
+                kwargs["queryset"] = recipe.cooking_methods.all()
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+            
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "recipe_ingredients":
+            # Check if the recipe is being added (not saved yet)
+            if "add" in request.path:
+                kwargs["queryset"] = RecipeIngredient.objects.none()
+            else:
+                # Filter ingredients based on the recipe ID
+                recipe_id = request.resolver_match.kwargs.get("object_id")
+                if recipe_id:
+                    kwargs["queryset"] = RecipeIngredient.objects.filter(recipe=recipe_id)
+
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
+    
 # Modify general info form, adding ingredient selector at botom
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_method"], "classes": ["collapse"]}),
+        ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
-    inlines = [RecipeIngredientInline, IngredientCookingMethodInline]
+    inlines = [RecipeIngredientInline, CookingStepsMethodInline]
 
     # Filters for each field
-    list_filter = ('dietary_preferences', 'equipment', 'cooking_method')
-    filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_method')
-
-
+    list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')
+    filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_methods')
 
     def get_filtered_queryset(self, model_class, request):
         if "add" in request.path:
@@ -79,6 +83,3 @@ admin.site.register(Ingredient)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Recipe, RecipeAdmin)
-
-###########################################################################################################################
-
