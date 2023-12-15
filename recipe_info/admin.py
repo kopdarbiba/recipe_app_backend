@@ -1,45 +1,36 @@
 from django.contrib import admin
-from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod
+from django.db.models import Q
+from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient
 from .models import IngredientCookingMethod
 
+# Manage unit type boolean values
+class UnitAdmin(admin.ModelAdmin):
+    list_display = ["name_lv", "type_shoping_valid"]
 
 class IngredientCookingMethodInline(admin.TabularInline):
     model = IngredientCookingMethod
     extra = 1
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-            # print(db_field.name)
-            if db_field.name == "recipe":
-                # Check if the RecipeNextForm is being added or changed
-                print("********************")
-                if "object_id" in request.resolver_match.kwargs:
-                    # Access the parent RecipeNextForm object ID
-                    id = request.resolver_match.kwargs["object_id"]
-                    print(id)
-            #         kwargs["queryset"] = RecipeNextForm.objects.filter(id=id)
-            #     else:
-            #         # The RecipeNextForm is being added, so we don't have an ID yet
-            #         kwargs["queryset"] = RecipeNextForm.objects.none()
+            if db_field.name == "ingredient":
+                # Check if the recipe is being added (not saved yet)
+                if "add" in request.path:
+                    kwargs["queryset"] = Ingredient.objects.none()
+                else:
+                    # Filter ingredients based on the recipe ID
+                    recipe_id = request.resolver_match.kwargs.get("object_id")
+                    kwargs["queryset"] = Ingredient.objects.filter(recipeingredient__recipe=recipe_id)
 
-            # if db_field.name == "ingredient":
-            #     # Use the current RecipeNextForm object ID dynamically
-            #     kwargs["queryset"] = RecipeIngredient.objects.filter(recipe=request.resolver_match.kwargs.get("object_id"))
+            if db_field.name == "cooking_method":
+                # Check if the recipe is being added (not saved yet)
+                if "add" in request.path:
+                    kwargs["queryset"] = CookingMethod.objects.none()
+                else:
+                    # Filter cooking methods based on the recipe ID
+                    recipe_id = request.resolver_match.kwargs.get("object_id")
+                    kwargs["queryset"] = Recipe.objects.get(pk=recipe_id).cooking_method.all()
 
-            # if db_field.name == "cooking_method":
-            #     # Use the current RecipeNextForm object ID dynamically
-            #     kwargs["queryset"] = CookingMethod.objects.filter(recipe=request.resolver_match.kwargs.get("object_id"))
-
-            # return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-
-
-
-
-
-
-# Manage unit type boolean values
-class UnitAdmin(admin.ModelAdmin):
-    list_display = ["name_lv", "type_shoping_valid"]
+            return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 # Ingredient selector at botmom of general info form. 
 class RecipeIngredientInline(admin.TabularInline):
@@ -51,7 +42,6 @@ class RecipeIngredientInline(admin.TabularInline):
             kwargs["queryset"] = Unit.objects.filter(type_shoping_valid=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-
 # Modify general info form, adding ingredient selector at botom
 class RecipeAdmin(admin.ModelAdmin):
     inlines = [RecipeIngredientInline, IngredientCookingMethodInline]
@@ -59,10 +49,25 @@ class RecipeAdmin(admin.ModelAdmin):
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_method')
     filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_method')
-    
-    
+
+    def get_filtered_queryset(self, model_class, request):
+        if "add" in request.path:
+            return model_class.objects.filter(recipe__isnull=True)
+        else:
+            recipe_id = request.resolver_match.kwargs.get("object_id")
+            return model_class.objects.filter(Q(recipe__isnull=True) | Q(recipe__id=recipe_id)) # This is pure MAGICK!!! :D
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "title":
+            kwargs["queryset"] = self.get_filtered_queryset(Title, request)
+        elif db_field.name == "description":
+            kwargs["queryset"] = self.get_filtered_queryset(Description, request)
+
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
 
 admin.site.register(Title)
+admin.site.register(Ingredient)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Recipe, RecipeAdmin)

@@ -81,7 +81,6 @@ class Unit(models.Model):
         return f"{self.name_eng}"
 
 class Ingredient(models.Model):
-    # Add price field. Need to find solution to create relation with unit table also
     allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(IngredientCategory, on_delete=models.SET_NULL, null=True)
 
@@ -114,11 +113,11 @@ class RecipeIngredient(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.quantity} {self.unit} of {self.ingredient.name_eng}" 
+        return f"{self.ingredient.name_eng}:  {self.quantity} {self.unit}" 
 
 class IngredientCookingMethod(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=5, decimal_places=2)
+    recipe_ingredient = models.ForeignKey(RecipeIngredient, on_delete=models.CASCADE)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
