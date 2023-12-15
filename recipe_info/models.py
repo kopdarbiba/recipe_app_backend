@@ -115,7 +115,7 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.ingredient.name_eng}:  {self.quantity} {self.unit}" 
 
-class IngredientCookingMethod(models.Model):
+class CookingSteps(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=5, decimal_places=2)

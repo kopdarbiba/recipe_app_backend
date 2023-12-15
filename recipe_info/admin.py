@@ -1,15 +1,16 @@
 from django.contrib import admin
 from django.db.models import Q
 from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient
-from .models import IngredientCookingMethod
+from .models import CookingSteps
 
 # Manage unit type boolean values
 class UnitAdmin(admin.ModelAdmin):
     list_display = ["name_lv", "type_shoping_valid"]
 
 class IngredientCookingMethodInline(admin.TabularInline):
-    model = IngredientCookingMethod
+    model = CookingSteps
     extra = 1
+    classes = ["collapse"]
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
             if db_field.name == "ingredient":
@@ -36,6 +37,7 @@ class IngredientCookingMethodInline(admin.TabularInline):
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
+    classes = ["collapse"]
     #Filter, to show only shoping valid units
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "unit":
@@ -44,11 +46,17 @@ class RecipeIngredientInline(admin.TabularInline):
 
 # Modify general info form, adding ingredient selector at botom
 class RecipeAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_method"], "classes": ["collapse"]}),
+    ]
+    
     inlines = [RecipeIngredientInline, IngredientCookingMethodInline]
 
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_method')
     filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_method')
+
+
 
     def get_filtered_queryset(self, model_class, request):
         if "add" in request.path:
