@@ -22,7 +22,7 @@ class Cuisine(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Meal(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -30,7 +30,7 @@ class Meal(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Equipment(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -38,7 +38,7 @@ class Equipment(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class DietaryPreference(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -46,7 +46,7 @@ class DietaryPreference(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
     
 class IngredientCategory(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -54,7 +54,7 @@ class IngredientCategory(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Allergen(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -62,7 +62,7 @@ class Allergen(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class CookingMethod(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -70,7 +70,7 @@ class CookingMethod(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Unit(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -78,14 +78,14 @@ class Unit(models.Model):
     name_rus = models.CharField(max_length=255, unique=True)
     type_shoping_valid = models.BooleanField(null=True)
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Adjective(models.Model):
     name_eng = models.CharField(max_length=50, unique=True)
     name_lv = models.CharField(max_length=50, unique=True)
     name_rus = models.CharField(max_length=50, unique=True)
     def __str__(self) -> str:
-        return f"{self.name_eng} / {self.name_lv}"
+        return f"{self.name_eng} | {self.name_lv}"
     
 class Ingredient(models.Model):
     allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True)
@@ -97,7 +97,7 @@ class Ingredient(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
 
     def __str__(self) -> str:
-        return f"{self.name_eng}"
+        return f"{self.name_eng} | {self.name_lv}"
     
 class Recipe(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)

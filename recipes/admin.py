@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient
+from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine
 from .models import CookingStep
 
 # Manage unit type boolean values
@@ -24,6 +24,8 @@ class CookingStepsMethodInline(admin.StackedInline):
     model = CookingStep
     extra = 1
     classes = ["collapse"]
+    list_filter = ('recipe_ingredients',)
+    filter_horizontal = ('recipe_ingredients',)
     fieldsets = (
         (None, {
                 'fields': ('step_number', 'cooking_method','recipe_ingredients')
@@ -87,7 +89,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-
+admin.site.register(Cuisine)
 admin.site.register(Title)
 admin.site.register(Ingredient)
 admin.site.register(Description)
