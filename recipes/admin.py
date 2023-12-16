@@ -18,7 +18,8 @@ class RecipeIngredientInline(admin.TabularInline):
             kwargs["queryset"] = Unit.objects.filter(type_shoping_valid=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-# TODO
+# Cooking step selector block at end of RecipeAdmin.
+# Filters updates after curent form is saved ( save and continue editing)
 class CookingStepsMethodInline(admin.TabularInline):
     model = CookingStep
     extra = 1
@@ -50,7 +51,7 @@ class CookingStepsMethodInline(admin.TabularInline):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     
-# Modify general info form, adding ingredient selector at botom
+# Modify general info form, adding ingredient and cooking steps selectors at botom
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
         ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
