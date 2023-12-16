@@ -1,30 +1,64 @@
 from rest_framework import serializers
-from .models import Recipe, RecipeIngredient
+from .models import Ingredient, Recipe, RecipeIngredient, Unit
+
+class IngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ingredient
+        fields = ['name_eng', 'name_lv','name_rus']
+
+class UnitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Unit
+        fields = ['name_eng', 'name_lv','name_rus']
+
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    ingredient = IngredientSerializer()
+    unit = UnitSerializer()
+    
+    class Meta:
+        model = RecipeIngredient
+        fields = ['ingredient', 'quantity', 'unit']
+
 
 class RecipeSerializer(serializers.ModelSerializer):
-    # ingredients = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
     cuisine = serializers.SerializerMethodField()
     meal = serializers.SerializerMethodField()
     dietary_preferences = serializers.SerializerMethodField()
     equipments = serializers.SerializerMethodField()
     cooking_methods = serializers.SerializerMethodField()
+    ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+
+
 
     class Meta:
         model = Recipe
         fields = [
             'title',
-            'equipments',
-            'dietary_preferences',
-            'meal',
-            'cuisine',
-            # 'ingredients',
-            'servings',
             'description',
-            # 'nutritional_information',
+            'cuisine',
+            'meal',
             'cooking_time',
+            'servings',
+            'dietary_preferences',
+            'equipments',
             'cooking_methods',
+            'ingredients',
         ]
 
+
+    def get_title(self, obj):
+        eng = obj.title.name_eng
+        lv = obj.title.name_lv
+        rus = obj.title.name_rus
+        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
+
+    def get_description(self, obj):
+        eng = obj.description.name_eng
+        lv = obj.description.name_lv
+        rus = obj.description.name_rus
+        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
 
     def get_cooking_methods(self, obj):
         cooking_methods = obj.cooking_methods.all()
@@ -40,8 +74,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return {'equipment': cooking_methods_info}
 
-
-
     def get_equipments(self, obj):
         equipments = obj.equipment.all()
         equipments_info = []
@@ -55,7 +87,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             equipments_info.append(equipment_info)
 
         return {'equipment': equipments_info}
-
 
     def get_dietary_preferences(self, obj):
         preferences = obj.dietary_preferences.all()
@@ -72,7 +103,6 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return {'preferences': preferences_info}
 
-
     def get_meal(self, obj):
         a = obj.dietary_preferences.all()
         print(a)
@@ -80,7 +110,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         lv = obj.meal.name_lv
         rus = obj.meal.name_rus
         return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
-
 
     def get_cuisine(self, obj):
         eng = obj.cuisine.name_eng
