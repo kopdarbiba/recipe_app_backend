@@ -1,4 +1,4 @@
-from recipes.models import Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory, Unit, CookingMethod
+from recipes.models import Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory, Unit, CookingMethod, Adjective
 
 
 # Define a dictionary to map table names to model classes
@@ -11,7 +11,8 @@ table_to_model = {
     'allergen': Allergen,
     'ingredient': Ingredient,
     'ingredient_category': IngredientCategory,
-    'cooking_method': CookingMethod
+    'cooking_method': CookingMethod,
+    'adjective' : Adjective,
 }
 
 UNIQUE_FIELD_NAME = 'name_eng'
