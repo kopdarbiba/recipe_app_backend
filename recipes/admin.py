@@ -20,10 +20,19 @@ class RecipeIngredientInline(admin.TabularInline):
 
 # Cooking step selector block at end of RecipeAdmin.
 # Filters updates after curent form is saved ( save and continue editing)
-class CookingStepsMethodInline(admin.TabularInline):
+class CookingStepsMethodInline(admin.StackedInline):
     model = CookingStep
     extra = 1
     classes = ["collapse"]
+    fieldsets = (
+        (None, {
+                'fields': ('step_number', 'cooking_method','recipe_ingredients')
+            }),
+            ('Optional Fields', {
+            'classes': ('collapse',),
+            'fields': ('adjective_cm', 'adjective_ri', 'adjective_alt', 'quantity', 'unit'),
+        }),
+    )
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "cooking_method":
             # Check if the recipe is being added (not saved yet)

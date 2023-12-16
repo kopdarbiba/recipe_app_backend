@@ -124,12 +124,15 @@ class RecipeIngredient(models.Model):
 
 class CookingStep(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    step_number = models.PositiveSmallIntegerField()
     cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
     recipe_ingredients = models.ManyToManyField(RecipeIngredient)
-    adjective = models.ForeignKey(Adjective, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
-
+    adjective_cm = models.ManyToManyField(Adjective, blank=True, related_name='adjective_cm_set')
+    adjective_ri = models.ManyToManyField(Adjective, blank=True, related_name='adjective_ri_set')
+    adjective_alt = models.ManyToManyField(Adjective, blank=True, related_name='adjective_alt_set')
+    
     def __str__(self) -> str:
         return f"Cooking Step for {self.recipe} - {self.cooking_method}"
 
