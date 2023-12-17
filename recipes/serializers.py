@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeIngredient, Unit
+from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep
+
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -29,6 +31,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     equipments = serializers.SerializerMethodField()
     cooking_methods = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+
 
 
 
@@ -117,22 +120,26 @@ class RecipeSerializer(serializers.ModelSerializer):
         rus = obj.cuisine.name_rus
         return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
 
-        
-    # def get_ingredients(self, obj):
-    #      # Get all ingredient substitutes related to the current Recipe (obj)
-    #     substitutes = obj.ingredient_substitutes.all()
+  
 
-    #     # Create a list to store information about each substitute ingredient
-    #     substitutes_info = []
-    #     for substitute in substitutes:
-    #         substitute_info = {
-    #             'id': substitute.id,
-    #             'name_eng': substitute.name_eng,
-    #             'name_lv': substitute.name_lv,
-    #             'name_rus': substitute.name_rus
-    #         }
-    #         substitutes_info.append(substitute_info)
+class CookingStepSerializer(serializers.ModelSerializer):
+    recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    cooking_method = serializers.StringRelatedField()
+    unit = serializers.StringRelatedField()
+    adjective_cm = serializers.StringRelatedField(many=True)
+    adjective_ri = serializers.StringRelatedField(many=True)
+    adjective_alt = serializers.StringRelatedField(many=True)
 
-    #     # Return a dictionary containing information about ingredients and substitutes
-    #     return {'ingredient_substitutes': substitutes_info}
-
+    class Meta:
+        model = CookingStep
+        fields = [
+            'recipe',
+            'step_number',
+            'cooking_method',
+            'recipe_ingredients',
+            'quantity',
+            'unit',
+            'adjective_cm',
+            'adjective_ri',
+            'adjective_alt',
+        ]
