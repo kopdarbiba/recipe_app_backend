@@ -21,7 +21,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ['ingredient', 'quantity', 'unit']
 
-
 class RecipeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
@@ -120,8 +119,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         rus = obj.cuisine.name_rus
         return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
 
-  
-
 class CookingStepSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     cooking_method = serializers.StringRelatedField()
@@ -143,3 +140,4 @@ class CookingStepSerializer(serializers.ModelSerializer):
             'adjective_ri',
             'adjective_alt',
         ]
+        
