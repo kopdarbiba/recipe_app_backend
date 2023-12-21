@@ -7,11 +7,16 @@ from .models import CookingStep
 class UnitAdmin(admin.ModelAdmin):
     list_display = ["name_lv", "type_shoping_valid"]
 
+@admin.register(Ingredient) # Search for ingredient in Recipe Ingredient
+class IngredientAdmin(admin.ModelAdmin):
+    search_fields = ['name_eng', 'name_lv', 'name_rus']
+
 # Ingredient selector at botmom of general info form. 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
     classes = ["collapse"]
+    autocomplete_fields = ['ingredient']  # Autocomplete for ingredient
     #Filter, to show only shoping valid units
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "unit":
@@ -91,7 +96,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 admin.site.register(Cuisine)
 admin.site.register(Title)
-admin.site.register(Ingredient)
+#admin.site.register(Ingredient)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Recipe, RecipeAdmin)
