@@ -46,7 +46,13 @@ def manage_create_update(model_class, GS_row: dict) -> None:
     if not created:
         # The object already existed, update its fields
         for key in GS_row:
-            setattr(instance, key, GS_row[key])
+            value = GS_row[key]
+
+            if isinstance(value, str):
+                value = value.lower()
+            
+            print(value)
+            setattr(instance, key, value)
         
         # Save the updated entry to the database
         instance.save()
