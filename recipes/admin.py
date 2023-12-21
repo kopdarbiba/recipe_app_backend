@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine
+from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction
 from .models import CookingStep
 
 # Manage unit type boolean values
@@ -22,6 +22,17 @@ class RecipeIngredientInline(admin.TabularInline):
         if db_field.name == "unit":
             kwargs["queryset"] = Unit.objects.filter(type_shoping_valid=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+# Text field for Cooking steps
+class CookingStepInstructionInline(admin.TabularInline):
+    model = CookingStepInstruction
+    extra = 1
+    classes = ["collapse"]
+    fieldsets = (
+    (None, {
+            'fields': ('step_number', 'name_eng')
+        }),
+)
 
 # Cooking step selector block at end of RecipeAdmin.
 # Filters updates after curent form is saved ( save and continue editing)
@@ -70,10 +81,10 @@ class CookingStepsMethodInline(admin.StackedInline):
 # Modify general info form, adding ingredient and cooking steps selectors at botom
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
+        ("General info", {"fields": ["title", "description", "cuisine", "occasion", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
-    inlines = [RecipeIngredientInline, CookingStepsMethodInline]
+    inlines = [RecipeIngredientInline, CookingStepInstructionInline, CookingStepsMethodInline]
 
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')
