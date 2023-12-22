@@ -6,12 +6,36 @@ from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ['name_eng', 'name_lv','name_rus']
+        fields = ['name_eng', 'name_lv', 'name_rus']
+
+    def to_representation(self, instance):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting the name using the selected language field
+        name = getattr(instance, lang_field, None)
+
+        return name
+
 
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
-        fields = ['name_eng', 'name_lv','name_rus']
+        fields = ['name_eng', 'name_lv', 'name_rus']
+
+    def to_representation(self, instance):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting the name using the selected language field
+        name = getattr(instance, lang_field, None)
+
+        return name
+
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
@@ -31,9 +55,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     cooking_methods = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
 
-
-
-
     class Meta:
         model = Recipe
         fields = [
@@ -49,75 +70,60 @@ class RecipeSerializer(serializers.ModelSerializer):
             'ingredients',
         ]
 
+    def get_localized_field(self, obj, field_name):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+        actual_field_name = f'{field_name}_{lang}'
+        return getattr(obj, actual_field_name, None)
 
     def get_title(self, obj):
-        eng = obj.title.name_eng
-        lv = obj.title.name_lv
-        rus = obj.title.name_rus
-        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
+        return self.get_localized_field(obj.title, 'name')
 
     def get_description(self, obj):
-        eng = obj.description.name_eng
-        lv = obj.description.name_lv
-        rus = obj.description.name_rus
-        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
-
-    def get_cooking_methods(self, obj):
-        cooking_methods = obj.cooking_methods.all()
-        cooking_methods_info = []
-        for method in cooking_methods:
-            method_info = {
-                'id': method.id,
-                'name_eng': method.name_eng,
-                'name_lv': method.name_lv,
-                'name_rus': method.name_rus
-            }
-            cooking_methods_info.append(method_info)
-
-        return {'equipment': cooking_methods_info}
-
-    def get_equipments(self, obj):
-        equipments = obj.equipment.all()
-        equipments_info = []
-        for equipment in equipments:
-            equipment_info = {
-                'id': equipment.id,
-                'name_eng': equipment.name_eng,
-                'name_lv': equipment.name_lv,
-                'name_rus': equipment.name_rus
-            }
-            equipments_info.append(equipment_info)
-
-        return {'equipment': equipments_info}
-
-    def get_dietary_preferences(self, obj):
-        preferences = obj.dietary_preferences.all()
-
-        preferences_info = []
-        for preference in preferences:
-            preference_info = {
-                'id': preference.id,
-                'name_eng': preference.name_eng,
-                'name_lv': preference.name_lv,
-                'name_rus': preference.name_rus
-            }
-            preferences_info.append(preference_info)
-
-        return {'preferences': preferences_info}
-
-    def get_meal(self, obj):
-        a = obj.dietary_preferences.all()
-        print(a)
-        eng = obj.meal.name_eng
-        lv = obj.meal.name_lv
-        rus = obj.meal.name_rus
-        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
+        return self.get_localized_field(obj.description, 'name')
 
     def get_cuisine(self, obj):
-        eng = obj.cuisine.name_eng
-        lv = obj.cuisine.name_lv
-        rus = obj.cuisine.name_rus
-        return {'name_eng': eng, 'name_lv': lv, 'name_rus': rus}
+        return self.get_localized_field(obj.cuisine, 'name')
+
+    def get_meal(self, obj):
+        return self.get_localized_field(obj.meal, 'name')
+
+
+    def get_dietary_preferences(self, obj):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+        preferences = obj.dietary_preferences.all()
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting names of dietary preferences using the selected language field
+        preference_names = [getattr(preference, lang_field) for preference in preferences]
+
+        return {'diets': preference_names}
+
+
+    def get_cooking_methods(self, obj):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+        cooking_methods = obj.cooking_methods.all()
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting cooking method names using the selected language field
+        cooking_method_names = [getattr(method, lang_field, None) for method in cooking_methods]
+
+        return {'cooking_methods': cooking_method_names}
+
+    def get_equipments(self, obj):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+        equipments = obj.equipment.all()
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting equipment names using the selected language field
+        equipment_names = [getattr(equipment, lang_field, None) for equipment in equipments]
+
+        return {'equipments': equipment_names}
 
 class CookingStepSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)

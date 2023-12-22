@@ -19,7 +19,6 @@ class ComplexSearchView(ListAPIView):
 
             if cuisine_name:
                 queryset = queryset.filter(cuisine__name_eng__icontains=cuisine_name)
-                print(queryset)
             if meal_name:
                 queryset = queryset.filter(meal__name_eng__icontains=meal_name)
 
