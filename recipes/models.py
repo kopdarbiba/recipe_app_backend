@@ -23,6 +23,14 @@ class Cuisine(models.Model):
 
     def __str__(self) -> str:
         return f"{self.name_eng} | {self.name_lv}"
+    
+class Occasion(models.Model):
+    name_eng = models.CharField(max_length=255, unique=True)
+    name_lv = models.CharField(max_length=255, unique=True)
+    name_rus = models.CharField(max_length=255, unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng} | {self.name_lv}"
 
 class Meal(models.Model):
     name_eng = models.CharField(max_length=255, unique=True)
@@ -103,6 +111,7 @@ class Recipe(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
     description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
     cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
+    occasion = models.ForeignKey(Occasion, on_delete=models.SET_NULL, null=True)
     meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()
     servings = models.PositiveIntegerField()
@@ -122,6 +131,16 @@ class RecipeIngredient(models.Model):
     def __str__(self):
         return f"{self.ingredient.name_eng}:  {self.quantity} {self.unit}" 
 
+class CookingStepInstruction(models.Model):
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    step_number = models.PositiveSmallIntegerField()
+    name_eng = models.TextField(max_length=3000, null=True, blank=True)
+    name_lv = models.TextField(max_length=3000, null=True, blank=True)
+    name_rus = models.TextField(max_length=3000, null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_eng}"
+    
 class CookingStep(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
     step_number = models.PositiveSmallIntegerField()
@@ -135,4 +154,3 @@ class CookingStep(models.Model):
     
     def __str__(self) -> str:
         return f"Cooking Step for {self.recipe} - {self.cooking_method}"
-

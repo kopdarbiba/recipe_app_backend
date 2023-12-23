@@ -11,16 +11,17 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Add table names
         db_table_list = [
-            'unit', 
-            'dietarypreference', 
-            'allergen', 
-            'equipment', 
-            'meal', 
             'cuisine', 
+            'occasion',
+            'meal', 
+            'equipment', 
+            'dietarypreference', 
             'ingredient_category', 
-            'ingredient', 
+            'allergen', 
             'cooking_method',
+            'unit', 
             'adjective',
+            'ingredient', 
         ]
         relative_key_path = config('RELATIVE_KEY_PATH')
         

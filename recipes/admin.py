@@ -1,22 +1,38 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine
+from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction
 from .models import CookingStep
 
 # Manage unit type boolean values
 class UnitAdmin(admin.ModelAdmin):
     list_display = ["name_lv", "type_shoping_valid"]
 
+@admin.register(Ingredient) # Search for ingredient in Recipe Ingredient
+class IngredientAdmin(admin.ModelAdmin):
+    search_fields = ['name_eng', 'name_lv', 'name_rus']
+
 # Ingredient selector at botmom of general info form. 
 class RecipeIngredientInline(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
     classes = ["collapse"]
+    autocomplete_fields = ['ingredient']  # Autocomplete for ingredient
     #Filter, to show only shoping valid units
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "unit":
             kwargs["queryset"] = Unit.objects.filter(type_shoping_valid=True)
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+# Text field for Cooking steps
+class CookingStepInstructionInline(admin.TabularInline):
+    model = CookingStepInstruction
+    extra = 1
+    classes = ["collapse"]
+    fieldsets = (
+    (None, {
+            'fields': ('step_number', 'name_eng')
+        }),
+)
 
 # Cooking step selector block at end of RecipeAdmin.
 # Filters updates after curent form is saved ( save and continue editing)
@@ -65,10 +81,10 @@ class CookingStepsMethodInline(admin.StackedInline):
 # Modify general info form, adding ingredient and cooking steps selectors at botom
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("General info", {"fields": ["title", "description", "cuisine", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
+        ("General info", {"fields": ["title", "description", "cuisine", "occasion", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
-    inlines = [RecipeIngredientInline, CookingStepsMethodInline]
+    inlines = [RecipeIngredientInline, CookingStepInstructionInline, CookingStepsMethodInline]
 
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')
@@ -91,7 +107,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 admin.site.register(Cuisine)
 admin.site.register(Title)
-admin.site.register(Ingredient)
+#admin.site.register(Ingredient)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Recipe, RecipeAdmin)
