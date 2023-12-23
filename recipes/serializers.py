@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep
+from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep, Occasion
 
 
 
@@ -19,7 +19,6 @@ class IngredientSerializer(serializers.ModelSerializer):
 
         return name
 
-
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
@@ -36,7 +35,6 @@ class UnitSerializer(serializers.ModelSerializer):
 
         return name
 
-
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
     unit = UnitSerializer()
@@ -49,6 +47,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
     cuisine = serializers.SerializerMethodField()
+    occasion = serializers.SerializerMethodField()
     meal = serializers.SerializerMethodField()
     dietary_preferences = serializers.SerializerMethodField()
     equipments = serializers.SerializerMethodField()
@@ -61,6 +60,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'title',
             'description',
             'cuisine',
+            'occasion',
             'meal',
             'cooking_time',
             'servings',
@@ -83,7 +83,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_cuisine(self, obj):
         return self.get_localized_field(obj.cuisine, 'name')
-
+    
+    def get_occasion(self, obj):
+        return self.get_localized_field(obj.occasion, 'name')
+    
     def get_meal(self, obj):
         return self.get_localized_field(obj.meal, 'name')
 
