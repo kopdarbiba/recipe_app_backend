@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep, Occasion
+from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep, CookingStepInstruction
 
 
 
@@ -43,6 +43,26 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         model = RecipeIngredient
         fields = ['ingredient', 'quantity', 'unit']
 
+class CookingStepInstructionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CookingStepInstruction
+        fields = ['step_number', 'name_eng', 'name_lv', 'name_rus']
+
+    def to_representation(self, instance):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+
+        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang_field = f'name_{lang}'
+
+        # Extracting the step name using the selected language field
+        step_name = getattr(instance, lang_field, None)
+
+        return {
+            'step_number': instance.step_number,
+            'name': step_name,
+        }
+
+
 class RecipeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
@@ -53,6 +73,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     equipments = serializers.SerializerMethodField()
     cooking_methods = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    instructions = CookingStepInstructionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Recipe
@@ -68,6 +89,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'equipments',
             'cooking_methods',
             'ingredients',
+            'instructions'
         ]
 
     def get_localized_field(self, obj, field_name):
@@ -90,7 +112,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_meal(self, obj):
         return self.get_localized_field(obj.meal, 'name')
 
-
     def get_dietary_preferences(self, obj):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
         preferences = obj.dietary_preferences.all()
@@ -102,7 +123,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         preference_names = [getattr(preference, lang_field) for preference in preferences]
 
         return {'diets': preference_names}
-
 
     def get_cooking_methods(self, obj):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
@@ -150,3 +170,4 @@ class CookingStepSerializer(serializers.ModelSerializer):
             'adjective_alt',
         ]
         
+

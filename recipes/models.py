@@ -120,7 +120,7 @@ class Recipe(models.Model):
     cooking_methods = models.ManyToManyField(CookingMethod)
     
     def __str__(self) -> str:
-        return f"{self.title}"
+        return f"model Recipe: {self.title}"
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredients')
@@ -132,7 +132,7 @@ class RecipeIngredient(models.Model):
         return f"{self.ingredient.name_eng}:  {self.quantity} {self.unit}" 
 
 class CookingStepInstruction(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='instructions')
     step_number = models.PositiveSmallIntegerField()
     name_eng = models.TextField(max_length=3000, null=True, blank=True)
     name_lv = models.TextField(max_length=3000, null=True, blank=True)
