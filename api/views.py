@@ -2,7 +2,6 @@ from rest_framework.generics import ListAPIView
 
 from recipes.models import Recipe
 from recipes.serializers import RecipeSerializer
-from rest_framework.response import Response
 
 
 class ComplexSearchView(ListAPIView):
@@ -42,7 +41,7 @@ class ComplexSearchView(ListAPIView):
 
         return Recipe.objects.none()
 
-
+    
 class RecipesByIngredientView(ListAPIView):
     serializer_class = RecipeSerializer
 
@@ -55,28 +54,6 @@ class RecipesByIngredientView(ListAPIView):
                 # Use '__ingredient__name_eng__icontains' for case-insensitive search
                 queryset = queryset.filter(ingredients__ingredient__name_eng__icontains=ingredient_name)
 
-
-            # # Print the generated SQL query
-            # print("SQL Query:")
-            # print(str(queryset.query))
-            # print("-------------------")
-
-            # # Print the list of recipes in the queryset
-            # print("Queryset:")
-            # for recipe in queryset:
-            #     print(f"Recipe Title: {recipe.title}, Ingredients: {[ingredient.ingredient.name_eng for ingredient in recipe.ingredients.all()]}")
-            #     print(f"Recipe Title: {recipe.title}, cooking step instructions: {[instruction.name_eng for instruction in recipe.instructions.all()]}")
-            # print("-------------------")
-
-
             return queryset.distinct()
 
         return Recipe.objects.none()
-
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        
-        # Corrected the format of the response
-        return Response({'recipes': serializer.data})

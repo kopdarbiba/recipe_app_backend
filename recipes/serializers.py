@@ -148,6 +148,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return {'equipments': equipment_names}
 
+# Curently not used
 class CookingStepSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     cooking_method = serializers.StringRelatedField()
