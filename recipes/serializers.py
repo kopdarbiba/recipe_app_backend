@@ -6,7 +6,7 @@ from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep, Coo
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
-        fields = ['name_eng', 'name_lv', 'name_rus']
+        fields = ['name_en', 'name_lv', 'name_ru']
 
     def to_representation(self, instance):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
@@ -22,7 +22,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class UnitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Unit
-        fields = ['name_eng', 'name_lv', 'name_rus']
+        fields = ['name_en', 'name_lv', 'name_ru']
 
     def to_representation(self, instance):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
@@ -46,7 +46,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class CookingStepInstructionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CookingStepInstruction
-        fields = ['step_number', 'name_eng', 'name_lv', 'name_rus']
+        fields = ['step_number', 'name_en', 'name_lv', 'name_ru']
 
     def to_representation(self, instance):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'

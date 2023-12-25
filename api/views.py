@@ -19,21 +19,21 @@ class ComplexSearchView(ListAPIView):
             queryset = Recipe.objects.all()
 
             if cuisine_name:
-                queryset = queryset.filter(cuisine__name_eng__icontains=cuisine_name)
+                queryset = queryset.filter(cuisine__name_en__icontains=cuisine_name)
             if meal_name:
-                queryset = queryset.filter(meal__name_eng__icontains=meal_name)
+                queryset = queryset.filter(meal__name_en__icontains=meal_name)
 
             for ingredient_name in ingredient_names:
-                queryset = queryset.filter(ingredients__ingredient__name_eng__icontains=ingredient_name)
+                queryset = queryset.filter(ingredients__ingredient__name_en__icontains=ingredient_name)
 
             for preference in dietary_preferences:
-                queryset = queryset.filter(dietary_preferences__name_eng__icontains=preference)
+                queryset = queryset.filter(dietary_preferences__name_en__icontains=preference)
 
             for equipment_name in equipment_names:
-                queryset = queryset.filter(equipment__name_eng__icontains=equipment_name)
+                queryset = queryset.filter(equipment__name_en__icontains=equipment_name)
 
             for cooking_method in cooking_methods:
-                queryset = queryset.filter(cooking_methods__name_eng__icontains=cooking_method)
+                queryset = queryset.filter(cooking_methods__name_en__icontains=cooking_method)
 
             # Add other filters based on additional parameters
 
@@ -52,7 +52,7 @@ class RecipesByIngredientView(ListAPIView):
             queryset = Recipe.objects.all()
             for ingredient_name in ingredient_names:
                 # Use '__ingredient__name_eng__icontains' for case-insensitive search
-                queryset = queryset.filter(ingredients__ingredient__name_eng__icontains=ingredient_name)
+                queryset = queryset.filter(ingredients__ingredient__name_en__icontains=ingredient_name)
 
             return queryset.distinct()
 
