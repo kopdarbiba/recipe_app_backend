@@ -11,6 +11,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Add table names
         db_table_list = [
+            'title',
+            'description',
             'cuisine', 
             'occasion',
             'meal', 

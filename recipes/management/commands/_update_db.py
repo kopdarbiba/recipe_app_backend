@@ -1,8 +1,10 @@
-from recipes.models import Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory, Unit, CookingMethod, Adjective, Occasion
+from recipes.models import Description, Meal, Cuisine, DietaryPreference, Equipment, Allergen, Ingredient, IngredientCategory, Title, Unit, CookingMethod, Adjective, Occasion
 
 
 # Define a dictionary to map table names to model classes
 table_to_model = {
+    'title': Title,
+    'description': Description,
     'cuisine': Cuisine,
     'occasion': Occasion,
     'meal': Meal,

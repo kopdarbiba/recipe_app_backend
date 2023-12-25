@@ -9,7 +9,7 @@ class UnitAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient) # Search for ingredient in Recipe Ingredient
 class IngredientAdmin(admin.ModelAdmin):
-    search_fields = ['name_eng', 'name_lv', 'name_rus']
+    search_fields = ['name_en', 'name_lv', 'name_ru']
 
 # Ingredient selector at botmom of general info form. 
 class RecipeIngredientInline(admin.TabularInline):
@@ -29,10 +29,10 @@ class CookingStepInstructionInline(admin.TabularInline):
     extra = 1
     classes = ["collapse"]
     fieldsets = (
-    (None, {
-            'fields': ('step_number', 'name_eng')
+        (None, {
+            'fields': ('step_number', 'name_en', 'name_lv', 'name_ru')
         }),
-)
+    )
 
 # Cooking step selector block at end of RecipeAdmin.
 # Filters updates after curent form is saved ( save and continue editing)
@@ -107,7 +107,6 @@ class RecipeAdmin(admin.ModelAdmin):
 
 admin.site.register(Cuisine)
 admin.site.register(Title)
-#admin.site.register(Ingredient)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)
 admin.site.register(Recipe, RecipeAdmin)
