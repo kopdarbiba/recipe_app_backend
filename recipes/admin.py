@@ -1,7 +1,31 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction
+from .models import Recipe, RecipeImage, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction
 from .models import CookingStep
+
+
+from django.utils.html import format_html
+
+class RecipeImageInline(admin.TabularInline):
+    model = RecipeImage
+    extra = 1
+    classes = ["collapse"]
+    readonly_fields = ['display_original_image', 'display_image_thumbnail']
+
+    def display_original_image(self, instance):
+        if instance.image:  # Assuming 'image' is the name of your image field
+            presigned_url = instance.generate_presigned_url_for_image()
+            return format_html('<img src="{}" width="70" height="70" />'.format(presigned_url))
+        return 'No Image'
+
+    def display_image_thumbnail(self, instance):
+        if instance.image:  # Assuming 'image' is the name of your image field
+            presigned_url = instance.generate_presigned_url_for_thumbnail()
+            return format_html('<img src="{}" width="70" height="70" />'.format(presigned_url))
+        return 'No Image'
+
+    display_original_image.short_description = 'Original'
+    display_image_thumbnail.short_description = 'Thumbnail'
 
 # Manage unit type boolean values
 class UnitAdmin(admin.ModelAdmin):
@@ -84,7 +108,7 @@ class RecipeAdmin(admin.ModelAdmin):
         ("General info", {"fields": ["title", "description", "cuisine", "occasion", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
-    inlines = [RecipeIngredientInline, CookingStepInstructionInline, CookingStepsMethodInline]
+    inlines = [RecipeIngredientInline, CookingStepInstructionInline, CookingStepsMethodInline, RecipeImageInline]
 
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')

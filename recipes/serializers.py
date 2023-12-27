@@ -1,6 +1,11 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeIngredient, Unit, CookingStep, CookingStepInstruction
+from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStep, CookingStepInstruction
 
+
+class RecipeImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RecipeImage
+        fields = ['image', 'thumbnail']
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -74,6 +79,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     cooking_methods = serializers.SerializerMethodField()
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     instructions = CookingStepInstructionSerializer(many=True, read_only=True)
+    images = RecipeImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Recipe
@@ -89,7 +95,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'equipments',
             'cooking_methods',
             'ingredients',
-            'instructions'
+            'instructions',
+            'images',
         ]
 
     def get_localized_field(self, obj, field_name):

@@ -1,4 +1,6 @@
 from django.db import models
+from recipes.utils.utilities import create_presigned_url
+
 
 class Title(models.Model):
     name_en = models.CharField(max_length=255)
@@ -154,3 +156,16 @@ class CookingStep(models.Model):
     
     def __str__(self) -> str:
         return f"Cooking Step for {self.recipe} - {self.cooking_method}"
+
+class RecipeImage(models.Model):
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='recipe_images/originals/')
+    thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True)
+
+    def generate_presigned_url_for_image(self, expiration_time=3600):
+        s3_key = self.image.name
+        return create_presigned_url(s3_key, expiration_time)
+
+    def generate_presigned_url_for_thumbnail(self, expiration_time=3600):
+        s3_key = self.thumbnail.name
+        return create_presigned_url(s3_key, expiration_time)
