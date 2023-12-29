@@ -3,9 +3,20 @@ from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, Coo
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = RecipeImage
-        fields = ['image', 'thumbnail']
+
+  image_url = serializers.SerializerMethodField()
+  thumbnail_url = serializers.SerializerMethodField()
+
+  class Meta:
+    model = RecipeImage
+    fields = ['image_url', 'thumbnail_url']
+
+  def get_image_url(self, obj):
+    return obj.generate_presigned_url_for_image()
+
+  def get_thumbnail_url(self, obj):
+    return obj.generate_presigned_url_for_thumbnail()
+
 
 
 class IngredientSerializer(serializers.ModelSerializer):

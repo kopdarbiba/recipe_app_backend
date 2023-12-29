@@ -3,7 +3,7 @@ import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
 
-def create_presigned_url(object_name, expiration=3600):
+def create_presigned_url(object_name, expiration):
     """Generate a presigned URL to share an S3 object
     :param object_name: string
     :param expiration: Time in seconds for the presigned URL to remain valid
