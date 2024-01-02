@@ -13,15 +13,15 @@ class RecipeImageInline(admin.TabularInline):
     readonly_fields = ['display_original_image', 'display_image_thumbnail']
 
     def display_original_image(self, instance):
-        if instance.image:  # Assuming 'image' is the name of your image field
+        if instance.image:
             presigned_url = instance.generate_presigned_url_for_image()
-            return format_html('<img src="{}" width="70" height="70" />'.format(presigned_url))
+            return format_html('<a href="{}" target="_blank"><img src="{}" width="70" height="70" style="cursor: pointer;" /></a>'.format(presigned_url, presigned_url))
         return 'No Image'
 
     def display_image_thumbnail(self, instance):
-        if instance.image:  # Assuming 'image' is the name of your image field
+        if instance.image:
             presigned_url = instance.generate_presigned_url_for_thumbnail()
-            return format_html('<img src="{}" width="70" height="70" />'.format(presigned_url))
+            return format_html('<a href="{}" target="_blank"><img src="{}" width="70" height="70" style="cursor: pointer;" /></a>'.format(presigned_url, presigned_url))
         return 'No Image'
 
     display_original_image.short_description = 'Original'

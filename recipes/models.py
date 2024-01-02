@@ -1,4 +1,7 @@
 from django.db import models
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from recipes.utils.utilities import create_presigned_url
 
 
@@ -160,8 +163,40 @@ class CookingStep(models.Model):
 class RecipeImage(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='recipe_images/originals/')
-    thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True, editable=False)
     is_main_image = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+
+        if self.image and not self.thumbnail:
+            # Open the original image using Pillow
+            img = Image.open(self.image)
+
+            # Create a thumbnail
+            thumbnail_size = (200, 200)  # Adjust the size as needed
+            img.thumbnail(thumbnail_size)
+
+            # Convert the image to RGB mode if it's in RGBA mode
+            if img.mode == 'RGBA':
+                img = img.convert('RGB')
+
+            # Create an in-memory file
+            thumb_io = BytesIO()
+            img.save(thumb_io, format='JPEG')
+
+            # Save the thumbnail to the thumbnail field
+            self.thumbnail.save(
+                f"thumb_{self.image.name}",
+                InMemoryUploadedFile(
+                    thumb_io,
+                    None,
+                    f"thumb_{self.image.name}",
+                    'image/jpeg',
+                    thumb_io.tell,
+                    None
+                )
+            )
 
     def generate_presigned_url_for_image(self, expiration_time=3600):
         s3_key = self.image.name
