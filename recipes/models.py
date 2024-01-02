@@ -1,3 +1,4 @@
+import os
 from django.db import models
 from PIL import Image
 from io import BytesIO
@@ -186,8 +187,9 @@ class RecipeImage(models.Model):
             img.save(thumb_io, format='JPEG')
 
             # Save the thumbnail to the thumbnail field
+            image_name = os.path.basename(self.image.name)
             self.thumbnail.save(
-                f"thumb_{self.image.name}",
+                image_name,
                 InMemoryUploadedFile(
                     thumb_io,
                     None,
