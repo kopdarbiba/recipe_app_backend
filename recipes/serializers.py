@@ -9,7 +9,7 @@ class RecipeImageSerializer(serializers.ModelSerializer):
 
   class Meta:
     model = RecipeImage
-    fields = ['image_url', 'thumbnail_url']
+    fields = ['image_url', 'thumbnail_url', 'is_main_image']
 
   def get_image_url(self, obj):
     return obj.generate_presigned_url_for_image()

@@ -162,7 +162,7 @@ class RecipeImage(models.Model):
     image = models.ImageField(upload_to='recipe_images/originals/')
     thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True)
     # add boolean value field to indicate whether the image is the main image or not
-    # is_main_image = models.BooleanField(default=False)
+    is_main_image = models.BooleanField(default=False)
 
     def generate_presigned_url_for_image(self, expiration_time=3600):
         s3_key = self.image.name
