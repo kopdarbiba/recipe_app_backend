@@ -161,7 +161,6 @@ class RecipeImage(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='recipe_images/originals/')
     thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True)
-    # add boolean value field to indicate whether the image is the main image or not
     is_main_image = models.BooleanField(default=False)
 
     def generate_presigned_url_for_image(self, expiration_time=3600):
