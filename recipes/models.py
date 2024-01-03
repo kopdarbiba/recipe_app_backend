@@ -104,7 +104,7 @@ class Adjective(models.Model):
         return f"{self.name_en} | {self.name_lv}"
     
 class Ingredient(models.Model):
-    allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True)
+    allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(IngredientCategory, on_delete=models.SET_NULL, null=True)
 
     name_en = models.CharField(max_length=255, unique=True)
@@ -118,14 +118,14 @@ class Ingredient(models.Model):
 class Recipe(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
     description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
-    cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True)
-    occasion = models.ForeignKey(Occasion, on_delete=models.SET_NULL, null=True)
+    cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True, blank=True)
+    occasion = models.ForeignKey(Occasion, on_delete=models.SET_NULL, null=True, blank=True)
     meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()
     servings = models.PositiveIntegerField()
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
-    cooking_methods = models.ManyToManyField(CookingMethod)
+    cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
