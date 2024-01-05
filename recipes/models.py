@@ -93,6 +93,7 @@ class Unit(models.Model):
     name_lv = models.CharField(max_length=255, unique=True)
     name_ru = models.CharField(max_length=255, unique=True)
     type_shoping_valid = models.BooleanField(null=True)
+
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv}"
 
@@ -100,6 +101,7 @@ class Adjective(models.Model):
     name_en = models.CharField(max_length=50, unique=True)
     name_lv = models.CharField(max_length=50, unique=True)
     name_ru = models.CharField(max_length=50, unique=True)
+
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv}"
     
@@ -129,12 +131,24 @@ class Recipe(models.Model):
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
+    
+    def get_price(self):
+        # Assuming you have a related field named 'ingredients'
+        total_price = self.ingredients.aggregate(models.Sum('ingredient__price'))['ingredient__price__sum']
 
+        # If there are no ingredients, return 0
+        return total_price or 0
+        
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=5, decimal_places=2)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
+
+    # def check_positive_quantity(self):
+    #     if self.quantity <= 0:
+    #         raise ValidationError("Quantity must be positive.")
+    #     return True
 
     def __str__(self):
         return f"{self.ingredient.name_en}:  {self.quantity} {self.unit}" 

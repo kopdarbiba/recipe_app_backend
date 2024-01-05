@@ -17,8 +17,6 @@ class RecipeImageSerializer(serializers.ModelSerializer):
   def get_thumbnail_url(self, obj):
     return obj.generate_presigned_url_for_thumbnail()
 
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -78,7 +76,6 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
             'name': step_name,
         }
 
-
 class RecipeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
@@ -91,6 +88,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     instructions = CookingStepInstructionSerializer(many=True, read_only=True)
     images = RecipeImageSerializer(many=True, read_only=True)
+    price = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -108,7 +106,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             'ingredients',
             'instructions',
             'images',
+            'price',
         ]
+
+    def get_price(self, obj):
+        return obj.get_price()
 
     def get_localized_field(self, obj, field_name):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
@@ -165,6 +167,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         equipment_names = [getattr(equipment, lang_field, None) for equipment in equipments]
 
         return {'equipments': equipment_names}
+
+
+
+
+
+
+
 
 # Curently not used
 class CookingStepSerializer(serializers.ModelSerializer):
