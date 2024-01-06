@@ -167,4 +167,25 @@ class YourModelTestCase(TestCase):
 
     def test_recipe_price(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
-        self.assertEqual(recipe.get_price(), 10)
+        recipe_ingredient = RecipeIngredient.objects.get(recipe=recipe, ingredient__name_en='Garlic')
+        self.assertEqual(recipe_ingredient.calculate_price(), 36)
+
+
+    def test_get_price(self):
+    # Fetch the recipe you created in setUpTestData
+        recipe = Recipe.objects.get(title__name_en='title_1')
+        
+        # Calculate expected total price based on your test data
+        expected_total_price = 0
+        for ri in recipe.ingredients.all():
+            expected_total_price += ri.quantity * ri.ingredient.price
+
+        # Assert that get_price returns the expected total price
+        self.assertEqual(recipe.get_price(), expected_total_price)
+
+
+
+    
+
+
+    
