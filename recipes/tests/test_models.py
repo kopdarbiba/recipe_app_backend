@@ -68,7 +68,7 @@ class YourModelTestCase(TestCase):
         ad3 = Adjective.objects.create(name_en='Intermediate', name_ru='Средний', name_lv='Vidējs')
 
         # Create ingredients for the test recipe
-        i1 = Ingredient.objects.create(name_en='Garlic', name_ru='Чеснок', name_lv='Ķiploks', price=4)
+        i1 = Ingredient.objects.create(name_en='Garlic', name_ru='Чеснок', name_lv='Ķiploks', price=3)
         i2 = Ingredient.objects.create(name_en='Apple', name_ru='Яблоко', name_lv='Ābols', price=6)
         i3 = Ingredient.objects.create(name_en='Salt', name_ru='Соль', name_lv='Sāls', price=100)
         i4 = Ingredient.objects.create(name_en='Pepper', name_ru='Перец', name_lv='Pipars', price=50)
@@ -117,8 +117,8 @@ class YourModelTestCase(TestCase):
         r3.cooking_methods.set([cm1, cm2])
 
         # Create RecipeIngredient instances for the test recipes with associated units and ingredients
-        RecipeIngredient.objects.create(recipe=r1, ingredient=i1, quantity=9, unit=u1)
-        RecipeIngredient.objects.create(recipe=r1, ingredient=i2, quantity=2, unit=u2)
+        RecipeIngredient.objects.create(recipe=r1, ingredient=i1, quantity=1, unit=u1)
+        RecipeIngredient.objects.create(recipe=r1, ingredient=i2, quantity=3, unit=u2)
         RecipeIngredient.objects.create(recipe=r2, ingredient=i3, quantity=13, unit=u3)
         RecipeIngredient.objects.create(recipe=r2, ingredient=i4, quantity=24, unit=u4)
         RecipeIngredient.objects.create(recipe=r3, ingredient=i5, quantity=5, unit=u1)
@@ -145,7 +145,7 @@ class YourModelTestCase(TestCase):
 
     def test_recipe_ingredients_count(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
-        self.assertEqual(recipe.ingredients.count(), 2)
+        self.assertEqual(recipe.recipe_ingredients.count(), 2)
 
     def test_cooking_step_instructions_count(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
@@ -154,7 +154,7 @@ class YourModelTestCase(TestCase):
     def test_recipe_ingredients_quantity(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
         recipe_ingredient = RecipeIngredient.objects.get(recipe=recipe, ingredient__name_en='Garlic')
-        self.assertEqual(recipe_ingredient.quantity, 9)
+        self.assertEqual(recipe_ingredient.quantity, 1)
 
     def test_recipe_ingredients_unit(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
@@ -163,8 +163,8 @@ class YourModelTestCase(TestCase):
 
     def test_ingredients_price(self):
         ingredient = Ingredient.objects.get(name_en='Garlic')
-        self.assertEqual(ingredient.price, 4)
+        self.assertEqual(ingredient.price, 3)
 
     def test_recipe_price(self):
         recipe = Recipe.objects.get(title__name_en='title_1')
-        self.assertEqual(recipe.get_price(), 10)
+        self.assertEqual(recipe.get_price(), 21)

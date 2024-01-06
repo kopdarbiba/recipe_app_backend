@@ -24,7 +24,7 @@ class ComplexSearchView(ListAPIView):
                 queryset = queryset.filter(meal__name_en__icontains=meal_name)
 
             for ingredient_name in ingredient_names:
-                queryset = queryset.filter(ingredients__ingredient__name_en__icontains=ingredient_name)
+                queryset = queryset.filter(recipe_ingredients__ingredient__name_en__icontains=ingredient_name)
 
             for preference in dietary_preferences:
                 queryset = queryset.filter(dietary_preferences__name_en__icontains=preference)
@@ -52,7 +52,7 @@ class RecipesByIngredientView(ListAPIView):
             queryset = Recipe.objects.all()
             for ingredient_name in ingredient_names:
                 # Use '__ingredient__name_eng__icontains' for case-insensitive search
-                queryset = queryset.filter(ingredients__ingredient__name_en__icontains=ingredient_name)
+                queryset = queryset.filter(recipe_ingredients__ingredient__name_en__icontains=ingredient_name)
 
             return queryset.distinct()
 

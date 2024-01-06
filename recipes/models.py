@@ -133,14 +133,16 @@ class Recipe(models.Model):
         return f"model Recipe: {self.title}"
     
     def get_price(self):
-        # Assuming you have a related field named 'ingredients'
-        total_price = self.ingredients.aggregate(models.Sum('ingredient__price'))['ingredient__price__sum']
+        total_price = 0
+
+        for recipe_ingredient in self.recipe_ingredients.all():
+            total_price += recipe_ingredient.quantity * recipe_ingredient.ingredient.price
 
         # If there are no ingredients, return 0
         return total_price or 0
         
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredients')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=5, decimal_places=2)
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
