@@ -132,6 +132,7 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
     
+    # TODO test feils, need to fix!!!
     def get_price(self):
         total_price = 0
 
