@@ -1,10 +1,12 @@
 import os
 from django.db import models
 from PIL import Image
+from decimal import Decimal
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
+
 from recipes.utils.utilities import create_presigned_url, delete_from_s3
 
 
@@ -128,19 +130,19 @@ class Recipe(models.Model):
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
-    
-    def __str__(self) -> str:
-        return f"model Recipe: {self.title}"
-    
-    # TODO test feils, need to fix!!!
+        
     def get_price(self):
         total_price = 0
 
         for recipe_ingredient in self.recipe_ingredients.all():
             total_price += recipe_ingredient.quantity * recipe_ingredient.ingredient.price
+        total_price = Decimal(total_price).quantize(Decimal('0.00'))
 
         # If there are no ingredients, return 0
         return total_price or 0
+
+    def __str__(self) -> str:
+        return f"model Recipe: {self.title}"
         
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')

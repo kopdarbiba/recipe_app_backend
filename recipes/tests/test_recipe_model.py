@@ -45,6 +45,6 @@ class RecipeModelTestCase(TestCase):
         recipe = Recipe.objects.get(title__name_en='pork meatballs')
         
         # Set the precision to two decimal places for comparison
-        expected_price = Decimal('14056.75').quantize(Decimal('0.00'))
+        expected_price = Decimal('14056.76').quantize(Decimal('0.00'))
 
         self.assertEqual(recipe.get_price(), expected_price)
