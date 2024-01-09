@@ -133,15 +133,6 @@ class Recipe(models.Model):
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
-<<<<<<< HEAD
-        
-    def get_price(self):
-        total_price = 0
-
-        for recipe_ingredient in self.recipe_ingredients.all():
-            total_price += recipe_ingredient.quantity * recipe_ingredient.ingredient.price
-        total_price = Decimal(total_price).quantize(Decimal('0.00'))
-=======
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
@@ -153,17 +144,10 @@ class Recipe(models.Model):
         ).aggregate(
             total_price=Sum('total_price_per_ingredient')
         )['total_price']
->>>>>>> anta_tests
 
         # If there are no ingredients, return 0
         return total_price or 0
 
-<<<<<<< HEAD
-    def __str__(self) -> str:
-        return f"model Recipe: {self.title}"
-        
-=======
->>>>>>> anta_tests
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
