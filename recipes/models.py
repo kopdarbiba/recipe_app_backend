@@ -137,9 +137,9 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
 
-    def get_price(self):
+    def get_recipe_total_price(self):
         # Calculate the total price based on quantity and ingredient's price
-        total_price = self.ingredients.annotate(
+        total_price = self.recipe_ingredients.annotate(
             total_price_per_ingredient=F('quantity') * F('ingredient__price')
         ).aggregate(
             total_price=Sum('total_price_per_ingredient')
@@ -154,15 +154,13 @@ class RecipeIngredient(models.Model):
     quantity = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return f"{self.ingredient.name_en}:  {self.quantity} {self.unit}" 
-    
+    def __str__(self) -> str:
+        return f"{self.ingredient.name_en}: {self.calculate_price()}"
+   
     # Returns calculated price (quantity x price)
     def calculate_price(self):
         return self.quantity * self.ingredient.price
 
-    def __str__(self) -> str:
-        return f"{self.ingredient.name_en}: {self.calculate_price()}"
 
 class CookingStepInstruction(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='instructions')

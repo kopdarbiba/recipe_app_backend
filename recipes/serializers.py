@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def get_price(self, obj):
-        return obj.get_price()
+        return obj.get_recipe_total_price()
 
     def get_localized_field(self, obj, field_name):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
