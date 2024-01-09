@@ -4,9 +4,11 @@ from django.db.models import Sum, F
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
+from django.core.validators import MinValueValidator
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from recipes.utils.utilities import create_presigned_url, delete_from_s3
+
 
 
 class Title(models.Model):
@@ -132,13 +134,6 @@ class Recipe(models.Model):
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
-    
-    # def get_price(self):
-    #     # Assuming you have a related field named 'ingredients'
-    #     total_price = self.ingredients.aggregate(models.Sum('ingredient__price'))['ingredient__price__sum']
-
-    #     # If there are no ingredients, return 0
-    #     return total_price or 0
 
     def get_price(self):
         # Calculate the total price based on quantity and ingredient's price
@@ -151,21 +146,11 @@ class Recipe(models.Model):
         # If there are no ingredients, return 0
         return total_price or 0
 
-
-
-
-
-        
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=5, decimal_places=2)
+    quantity = models.DecimalField(max_digits=5, decimal_places=2, validators=[MinValueValidator(0.01)])
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
-
-    # def check_positive_quantity(self):
-    #     if self.quantity <= 0:
-    #         raise ValidationError("Quantity must be positive.")
-    #     return True
 
     def __str__(self):
         return f"{self.ingredient.name_en}:  {self.quantity} {self.unit}" 
