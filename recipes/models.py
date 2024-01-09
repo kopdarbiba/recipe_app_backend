@@ -19,9 +19,9 @@ class Title(models.Model):
         return f"{self.name_en}"
 
 class Description(models.Model):
-    name_en = models.TextField()
-    name_lv = models.TextField(max_length=3000, null=True, blank=True)
-    name_ru = models.TextField(max_length=3000, null=True, blank=True)
+    name_en = models.CharField(max_length=3000)
+    name_lv = models.CharField(max_length=3000, null=True, blank=True)
+    name_ru = models.CharField(max_length=3000, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name_en}"

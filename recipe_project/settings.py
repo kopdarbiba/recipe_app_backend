@@ -138,18 +138,3 @@ AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
 
 # Use Amazon S3 for storage for uploaded media files.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
-
-# Check if any of the required variables is missing
-if not all(
-    [
-        AWS_ACCESS_KEY_ID, 
-        AWS_SECRET_ACCESS_KEY, 
-        AWS_S3_REGION_NAME, 
-        AWS_STORAGE_BUCKET_NAME
-    ]
-    ):
-    raise ValueError("Please provide all required AWS environment variables.")
-else:
-    print("All required AWS environment variables are present.")
-    
