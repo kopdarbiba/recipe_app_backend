@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeImage, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction
+from .models import Recipe, RecipeImage, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction, Occasion
 from .models import CookingStep
 
 
@@ -130,6 +130,7 @@ class RecipeAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 admin.site.register(Cuisine)
+admin.site.register(Occasion)
 admin.site.register(Title)
 admin.site.register(Description)
 admin.site.register(Unit, UnitAdmin)

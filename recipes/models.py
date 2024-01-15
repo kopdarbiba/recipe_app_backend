@@ -93,6 +93,14 @@ class CookingMethod(models.Model):
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv}"
 
+class Adjective(models.Model):
+    name_en = models.CharField(max_length=50, unique=True)
+    name_lv = models.CharField(max_length=50, unique=True)
+    name_ru = models.CharField(max_length=50, unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.name_en} | {self.name_lv}"
+    
 class Unit(models.Model):
     name_en = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
@@ -102,14 +110,6 @@ class Unit(models.Model):
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv}"
 
-class Adjective(models.Model):
-    name_en = models.CharField(max_length=50, unique=True)
-    name_lv = models.CharField(max_length=50, unique=True)
-    name_ru = models.CharField(max_length=50, unique=True)
-
-    def __str__(self) -> str:
-        return f"{self.name_en} | {self.name_lv}"
-    
 class Ingredient(models.Model):
     allergen = models.ForeignKey(Allergen, on_delete=models.SET_NULL, null=True, blank=True)
     category = models.ForeignKey(IngredientCategory, on_delete=models.SET_NULL, null=True)
@@ -120,7 +120,7 @@ class Ingredient(models.Model):
     price = models.DecimalField(max_digits=6, decimal_places=2, null=True)
 
     def __str__(self) -> str:
-        return f"{self.name_en} | {self.name_lv}"
+        return f"{self.name_en} | {self.name_lv} | {self.price}"
     
 class Recipe(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
