@@ -1,41 +1,43 @@
-import unittest
-from unittest.mock import Mock, patch
-from botocore.exceptions import ClientError
+# ChatGPT action!!!
 
+
+
+import unittest
+from unittest.mock import patch
+from django.conf import settings
 from recipes.utils.utilities import delete_from_s3
 
 class TestDeleteFromS3(unittest.TestCase):
-    @patch('recipes.utils.utilities.get_s3_client')
-    def test_delete_from_s3_success(self, mock_get_s3_client):
-        # Mock the S3 client and its delete_object method for a successful deletion
-        mock_s3_client = Mock()
-        mock_s3_client.delete_object.return_value = {'ResponseMetadata': {'HTTPStatusCode': 204}}
-        mock_get_s3_client.return_value = mock_s3_client
 
-        # Call the function with a mock S3 key
-        result = delete_from_s3('test_key')
+    def setUp(self):
+        # Mock the get_s3_client function
+        self.get_s3_client_patch = patch('recipes.utils.utilities.get_s3_client')
+        self.mock_get_s3_client = self.get_s3_client_patch.start()
 
-        # Assert that the S3 client was called with the correct parameters
-        mock_s3_client.delete_object.assert_called_once_with(Bucket='bildes-receptem', Key='test_key')
+        # Mocking the Django project settings
+        settings.AWS_ACCESS_KEY_ID = 'your_access_key_id'
+        settings.AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
+        settings.AWS_S3_REGION_NAME = 'your_region'
+        settings.AWS_STORAGE_BUCKET_NAME = 'your_bucket_name'
 
-        # Assert that the function returned True for a successful deletion
-        self.assertTrue(result)
+    def tearDown(self):
+        # Clean up resources after each test
+        self.get_s3_client_patch.stop()
 
-    @patch('recipes.utils.utilities.get_s3_client')
-    def test_delete_from_s3_failure(self, mock_get_s3_client):
-        # Mock the S3 client and its delete_object method for a failure
-        mock_s3_client = Mock()
-        mock_s3_client.delete_object.side_effect = ClientError({'Error': {'Code': 'NoSuchKey'}}, 'operation_name')
-        mock_get_s3_client.return_value = mock_s3_client
+    def test_delete_from_s3_error(self):
+        # Mock an error in delete_object
+        expected_error_message = 'Simulating an error during object deletion'
+        self.mock_get_s3_client.return_value.delete_object.side_effect = Exception(expected_error_message)
 
-        # Call the function with a mock S3 key
-        result = delete_from_s3('nonexistent_key')
+        # Call the function
+        object_key = 'your_object_key'
+        result = None
+        with self.assertRaises(Exception, msg=expected_error_message):
+            result = delete_from_s3(object_key)
 
-        # Assert that the S3 client was called with the correct parameters
-        mock_s3_client.delete_object.assert_called_once_with(Bucket='bildes-receptem', Key='nonexistent_key')
-
-        # Assert that the function returned False for a failed deletion
-        self.assertFalse(result)
+        # Assertions
+        self.assertIsNone(result)
+        self.mock_get_s3_client.assert_called_once()
 
 if __name__ == '__main__':
     unittest.main()

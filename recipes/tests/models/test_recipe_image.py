@@ -1,36 +1,25 @@
-# from django.test import TestCase
-# from moto import mock_s3
-# from recipes.models import RecipeImage, Recipe, Title
-# from django.core.files.uploadedfile import SimpleUploadedFile
-# from django.contrib.auth.models import User
+from django.test import TestCase
+from unittest.mock import patch, call
+from recipes.models import RecipeImage, delete_from_s3
 
-# @mock_s3
-# class RecipeImageModelTest(TestCase):
-#     @classmethod
-#     def setUpClass(cls):
-#         super().setUpClass()
+class RecipeImageTestCase(TestCase):
+    @patch('recipes.models.delete_from_s3')
+    def test_delete_method(self, mock_delete_from_s3):
+        # Arrange
+        # Create a RecipeImage instance without associating it with a Recipe
+        instance = RecipeImage.objects.create(recipe_id=1, image='path/to/image.jpg', thumbnail='path/to/thumbnail.jpg')  
 
-#         # Start the moto mock
-#         cls.mock_s3 = mock_s3()
-#         cls.mock_s3.start()
+        # Act
+        instance.delete()
 
-#     @classmethod
-#     def tearDownClass(cls):
-#         # Stop the moto mock
-#         cls.mock_s3.stop()
-#         super().tearDownClass()
+        # Assert
+        expected_calls = [
+            call('path/to/image.jpg'),
+            call('path/to/thumbnail.jpg'),
+        ]
 
-#     def setUp(self):
-#         self.title1 = Title.objects.create(name_en="Recipe 1", name_ru="Recipe 1", name_lv="Recipe 1")  
-#         self.user = User.objects.create_user(username='testuser', password='testpass')
-#         self.recipe = Recipe.objects.create(title=self.title1, cooking_time=1, servings=2)
+        mock_delete_from_s3.assert_has_calls(expected_calls, any_order=True)
 
-#         # Load the test image from the fixtures directory
-#         image_path = 'recipes/tests/fixtures/test_image.png'
-#         with open(image_path, 'rb') as file:
-#             self.image = SimpleUploadedFile("test_image.png", file.read(), content_type="image/png")
+        # Check if the parent class's delete method was called
+        self.assertIsNone(instance.pk)
 
-#         self.recipe_image = RecipeImage.objects.create(recipe=self.recipe, image=self.image)
-
-#     def test_test(self):
-#         self.assertTrue(True)

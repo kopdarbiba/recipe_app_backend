@@ -32,6 +32,10 @@ def create_presigned_url(object_name, expiration):
     except ClientError as e:
         logging.error(e)
         return None
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+        return None
+
 
 def delete_from_s3(object_key):
     """Delete an object from S3

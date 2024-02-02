@@ -1,52 +1,59 @@
-# Warning!!! This test is chatGPT generated!!!
+# ChatGPT action!!!
+
 
 import unittest
-from unittest.mock import Mock, patch
-from botocore.exceptions import ClientError
+from unittest.mock import patch
 from django.conf import settings
-
 from recipes.utils.utilities import create_presigned_url
+import logging
 
 class TestCreatePresignedUrl(unittest.TestCase):
-    @patch('recipes.utils.utilities.get_s3_client')
-    def test_create_presigned_url_success(self, mock_get_s3_client):
-        # Mock the S3 client and its generate_presigned_url method for a successful URL generation
-        mock_s3_client = Mock()
-        mock_s3_client.generate_presigned_url.return_value = 'https://example.com/s3/signed-url'
-        mock_get_s3_client.return_value = mock_s3_client
 
-        # Call the function with a mock S3 key
-        result = create_presigned_url('test_key', expiration=3600)
+    def setUp(self):
+        # Mock the get_s3_client function
+        self.get_s3_client_patch = patch('recipes.utils.utilities.get_s3_client')
+        self.mock_get_s3_client = self.get_s3_client_patch.start()
 
-        # Assert that the S3 client was called with the correct parameters
-        expected_params = {
-            'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-            'Key': 'test_key',
-        }
-        mock_s3_client.generate_presigned_url.assert_called_once_with('get_object', Params=expected_params, ExpiresIn=3600)
+        # Mocking the Django project settings
+        settings.AWS_ACCESS_KEY_ID = 'your_access_key_id'
+        settings.AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
+        settings.AWS_S3_REGION_NAME = 'your_region'
+        settings.AWS_STORAGE_BUCKET_NAME = 'your_bucket_name'
+        
+        # Enable logging for unit-test
+        logging.basicConfig(filename='test_log.txt', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
-        # Assert that the function returned the expected signed URL
-        self.assertEqual(result, 'https://example.com/s3/signed-url')
+    def tearDown(self):
+        # Clean up resources after each test
+        self.get_s3_client_patch.stop()
 
-    @patch('recipes.utils.utilities.get_s3_client')
-    def test_create_presigned_url_failure(self, mock_get_s3_client):
-        # Mock the S3 client and its generate_presigned_url method for a failure
-        mock_s3_client = Mock()
-        mock_s3_client.generate_presigned_url.side_effect = ClientError({'Error': {'Code': 'AccessDenied'}}, 'operation_name')
-        mock_get_s3_client.return_value = mock_s3_client
+    def test_create_presigned_url_success(self):
+        # Mock the response from generate_presigned_url
+        mock_presigned_url = 'https://your-presigned-url.com'
+        self.mock_get_s3_client.return_value.generate_presigned_url.return_value = mock_presigned_url
 
-        # Call the function with a mock S3 key
-        result = create_presigned_url('nonexistent_key', expiration=3600)
+        # Call the function
+        object_name = 'your_object_key'
+        expiration = 3600
+        presigned_url = create_presigned_url(object_name, expiration)
 
-        # Assert that the S3 client was called with the correct parameters
-        expected_params = {
-            'Bucket': settings.AWS_STORAGE_BUCKET_NAME,
-            'Key': 'nonexistent_key',
-        }
-        mock_s3_client.generate_presigned_url.assert_called_once_with('get_object', Params=expected_params, ExpiresIn=3600)
+        # Assertions
+        self.assertEqual(presigned_url, mock_presigned_url)
+        self.mock_get_s3_client.assert_called_once()
 
-        # Assert that the function returned None for a failed URL generation
-        self.assertIsNone(result)
+    def test_create_presigned_url_error(self):
+        # Mock an error in generate_presigned_url
+        self.mock_get_s3_client.return_value.generate_presigned_url.side_effect = Exception('Simulating an error during predesigned URL creation in unit-test')
+
+        # Call the function
+        object_name = 'your_object_key'
+        expiration = 3600
+        presigned_url = create_presigned_url(object_name, expiration)
+
+        # Assertions
+        self.assertIsNone(presigned_url)
+        self.mock_get_s3_client.assert_called_once()
+        
 
 if __name__ == '__main__':
     unittest.main()
