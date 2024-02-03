@@ -161,3 +161,4 @@ cython_debug/
 data_population/recipeapp.json
 db.sqlite3
 creds.json
+test_log.txt

@@ -16,3 +16,4 @@
 2024-02-02 20:03:09,477 - ERROR - Unexpected error: Simulating an error during predesigned URL creation in unit-test
 2024-02-02 20:04:11,358 - ERROR - Unexpected error: Simulating an error during predesigned URL creation in unit-test
 2024-02-02 20:04:34,170 - ERROR - Unexpected error: Simulating an error during predesigned URL creation in unit-test
+2024-02-02 20:12:03,164 - ERROR - Unexpected error: Simulating an error during predesigned URL creation in unit-test
