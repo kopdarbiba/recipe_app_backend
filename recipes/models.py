@@ -1,18 +1,10 @@
-from datetime import timezone
-import os
-from decouple import config
 from django.db import models
 from django.db.models import Sum, F
-from PIL import Image
-from decimal import Decimal
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import MinValueValidator
 from django.dispatch import receiver
-from django.db.models.signals import pre_delete, post_save
+from django.db.models.signals import post_save
 
-from recipes.utils.utilities import create_presigned_url, delete_from_s3
-
+from recipes.utils.utilities import create_presigned_url, delete_from_s3, generate_thumbnail, save_thumbnail
 
 
 class Title(models.Model):
@@ -214,49 +206,50 @@ class RecipeImage(models.Model):
         super().delete(*args, **kwargs)
 
 
-@receiver(pre_delete, sender=RecipeImage)
-def delete_s3_images(sender, instance, **kwargs):
-    # This signal is triggered just before the model instance is deleted
-    # You can use it to delete S3 objects associated with the instance
-    s3_key_image = instance.image.name
-    s3_key_thumbnail = instance.thumbnail.name if instance.thumbnail else None
-
-    # Delete the original image and thumbnail
-    delete_from_s3(s3_key_image)
-    if s3_key_thumbnail:
-        delete_from_s3(s3_key_thumbnail)
-
 @receiver(post_save, sender=RecipeImage)
-def generate_thumbnail(sender, instance, **kwargs):
-    # Generate thumbnail here and save it to the instance
-    # This can be done asynchronously using a task queue like Celery
-    if instance.image and not instance.thumbnail:
-        # Open the original image using Pillow
-        img = Image.open(instance.image)
+def generate_thumbnail_signal(sender, instance, **kwargs):
+    # print()
+    # print(f'instance!!!:{instance.image.name}')
+    if kwargs.get('created', False):
+        thumbnail = generate_thumbnail(instance)
+        if thumbnail:
+            save_thumbnail(instance, thumbnail)
 
-        # Create a thumbnail
-        thumbnail_size = (100, 100)  # Adjust the size as needed
-        img.thumbnail(thumbnail_size)
 
-        # Convert the image to RGB mode if it's in RGBA mode
-        if img.mode == 'RGBA':
-            img = img.convert('RGB')
 
-        # Create an in-memory file
-        thumb_io = BytesIO()
-        img.save(thumb_io, format='JPEG')
 
-        # Save the thumbnail to the thumbnail field
-        image_name = os.path.basename(instance.image.name)
-        thumbnail_path = f"thumb_{image_name}"
-        instance.thumbnail.save(
-            thumbnail_path,
-            InMemoryUploadedFile(
-                thumb_io,
-                None,
-                thumbnail_path,
-                'image/jpeg',
-                thumb_io.tell,
-                None
-            )
-        )
+# @receiver(post_save, sender=RecipeImage)
+# def generate_thumbnail(sender, instance, **kwargs):
+#     print("*****************************")
+#     # Generate thumbnail here and save it to the instance
+#     # This can be done asynchronously using a task queue like Celery
+#     if instance.image and not instance.thumbnail:
+#         # Open the original image using Pillow
+#         img = Image.open(instance.image)
+
+#         # Create a thumbnail
+#         thumbnail_size = (100, 100)  # Adjust the size as needed
+#         img.thumbnail(thumbnail_size)
+
+#         # Convert the image to RGB mode if it's in RGBA mode
+#         if img.mode == 'RGBA':
+#             img = img.convert('RGB')
+
+#         # Create an in-memory file
+#         thumb_io = BytesIO()
+#         img.save(thumb_io, format='JPEG')
+
+#         # Save the thumbnail to the thumbnail field
+#         image_name = os.path.basename(instance.image.name)
+#         thumbnail_path = f"thumb_{image_name}"
+#         instance.thumbnail.save(
+#             thumbnail_path,
+#             InMemoryUploadedFile(
+#                 thumb_io,
+#                 None,
+#                 thumbnail_path,
+#                 'image/jpeg',
+#                 thumb_io.tell,
+#                 None
+#             )
+#         )

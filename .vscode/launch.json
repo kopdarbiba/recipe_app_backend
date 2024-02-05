@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: unittest2",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/venv/bin/python",
+            "args": [
+                "${workspaceFolder}/manage.py",
+                "test",
+                "recipes.tests"
+            ],
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "recipe_project.settings"
+            },
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        }
+    ]
+}
