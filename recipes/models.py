@@ -1,10 +1,9 @@
 from django.db import models
 from django.db.models import Sum, F
 from django.core.validators import MinValueValidator
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 
-from recipes.utils.utilities import create_presigned_url, delete_from_s3, generate_thumbnail, save_thumbnail
+from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
+from recipes.utils.thumbnail_utils import manage_thumbnails
 
 
 class Title(models.Model):
@@ -205,51 +204,9 @@ class RecipeImage(models.Model):
 
         super().delete(*args, **kwargs)
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the original save method
 
-@receiver(post_save, sender=RecipeImage)
-def generate_thumbnail_signal(sender, instance, **kwargs):
-    # print()
-    # print(f'instance!!!:{instance.image.name}')
-    if kwargs.get('created', False):
-        thumbnail = generate_thumbnail(instance)
-        if thumbnail:
-            save_thumbnail(instance, thumbnail)
+        # Generate and save the thumbnail if the image has been changed
+        manage_thumbnails(self)
 
-
-
-
-# @receiver(post_save, sender=RecipeImage)
-# def generate_thumbnail(sender, instance, **kwargs):
-#     print("*****************************")
-#     # Generate thumbnail here and save it to the instance
-#     # This can be done asynchronously using a task queue like Celery
-#     if instance.image and not instance.thumbnail:
-#         # Open the original image using Pillow
-#         img = Image.open(instance.image)
-
-#         # Create a thumbnail
-#         thumbnail_size = (100, 100)  # Adjust the size as needed
-#         img.thumbnail(thumbnail_size)
-
-#         # Convert the image to RGB mode if it's in RGBA mode
-#         if img.mode == 'RGBA':
-#             img = img.convert('RGB')
-
-#         # Create an in-memory file
-#         thumb_io = BytesIO()
-#         img.save(thumb_io, format='JPEG')
-
-#         # Save the thumbnail to the thumbnail field
-#         image_name = os.path.basename(instance.image.name)
-#         thumbnail_path = f"thumb_{image_name}"
-#         instance.thumbnail.save(
-#             thumbnail_path,
-#             InMemoryUploadedFile(
-#                 thumb_io,
-#                 None,
-#                 thumbnail_path,
-#                 'image/jpeg',
-#                 thumb_io.tell,
-#                 None
-#             )
-#         )

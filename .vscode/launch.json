@@ -1,21 +1,37 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: unittest2",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/venv/bin/python",
-            "args": [
-                "${workspaceFolder}/manage.py",
-                "test",
-                "recipes.tests"
-            ],
-            "env": {
-                "DJANGO_SETTINGS_MODULE": "recipe_project.settings"
-            },
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Django localhost runserver",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+          "runserver",
+          "--noreload"
+      ],
+      "django": true,
+      "stopOnEntry": false,
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Python: Django Tests (debugpy)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/manage.py",
+      "args": [
+        "test",
+        "--noinput",
+        "--pdb",
+        "--traceback",
+        // "your_app.tests.test_module.YourTestCase.test_method"
+      ],
+      "django": true,
+      "cwd": "${workspaceFolder}",
+      "env": {},
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
 }

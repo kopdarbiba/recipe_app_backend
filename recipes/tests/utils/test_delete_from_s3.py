@@ -5,13 +5,13 @@
 import unittest
 from unittest.mock import patch
 from django.conf import settings
-from recipes.utils.utilities import delete_from_s3
+from recipes.utils.s3_utils import delete_from_s3
 
 class TestDeleteFromS3(unittest.TestCase):
 
     def setUp(self):
         # Mock the get_s3_client function
-        self.get_s3_client_patch = patch('recipes.utils.utilities.get_s3_client')
+        self.get_s3_client_patch = patch('recipes.utils.s3_utils.get_s3_client')
         self.mock_get_s3_client = self.get_s3_client_patch.start()
 
         # Mocking the Django project settings

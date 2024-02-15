@@ -4,14 +4,14 @@
 import unittest
 from unittest.mock import patch
 from django.conf import settings
-from recipes.utils.utilities import get_s3_client
+from recipes.utils.s3_utils import get_s3_client
 
 
 class TestGetS3Client(unittest.TestCase):
 
     def setUp(self):
         # Mock the boto3.client method for the entire test case
-        self.boto3_client_patch = patch('recipes.utils.utilities.boto3.client')
+        self.boto3_client_patch = patch('recipes.utils.s3_utils.boto3.client')
         self.mock_boto3_client = self.boto3_client_patch.start()
 
         # Mocking the Django project settings
