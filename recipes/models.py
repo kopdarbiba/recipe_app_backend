@@ -136,17 +136,27 @@ class Recipe(models.Model):
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
-
+   
+    @property
+    def price(self):
+        """Recipe price as a field for serializer"""
+        return self.get_recipe_total_price()
+    
     def get_recipe_total_price(self):
-        # Calculate the total price based on quantity and ingredient's price
-        total_price = self.recipe_ingredients.annotate(
-            total_price_per_ingredient=F('quantity') * F('ingredient__price')
-        ).aggregate(
-            total_price=Sum('total_price_per_ingredient')
-        )['total_price']
+        """Calculate the total price based on quantity and ingredient's price"""
+        if self.recipe_ingredients:
+            total_price = self.recipe_ingredients.annotate(
+                total_price_per_ingredient=F('quantity') * F('ingredient__price')
+            ).aggregate(
+                total_price=Sum('total_price_per_ingredient')
+            )['total_price']
+        else:
+            total_price = 0
 
-        # If there are no ingredients, return 0
-        return total_price or 0
+        return "%.2f" %(total_price)
+    
+
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')

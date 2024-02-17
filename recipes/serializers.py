@@ -61,7 +61,7 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
     class Meta:
         model = CookingStepInstruction
         fields = ['step_number', 'name_en', 'name_lv', 'name_ru']
-
+  
     def to_representation(self, instance):
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
 
@@ -88,7 +88,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     instructions = CookingStepInstructionSerializer(many=True, read_only=True)
     images = RecipeImageSerializer(many=True, read_only=True)
-    price = serializers.SerializerMethodField(read_only=True)
+    # price = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -109,11 +109,8 @@ class RecipeSerializer(serializers.ModelSerializer):
             'price',
         ]
 
-    def get_price(self, obj):
-        return obj.get_recipe_total_price()
-
     def get_localized_field(self, obj, field_name):
-        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'  
         actual_field_name = f'{field_name}_{lang}'
         return getattr(obj, actual_field_name, None)
 
