@@ -1,6 +1,6 @@
 import os
 from django.db import models
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Value, IntegerField
 from PIL import Image
 from decimal import Decimal
 from io import BytesIO
@@ -144,18 +144,17 @@ class Recipe(models.Model):
     
     def get_recipe_total_price(self):
         """Calculate the total price based on quantity and ingredient's price"""
+        total_price = 0
         if self.recipe_ingredients:
             total_price = self.recipe_ingredients.annotate(
+                total_price_per_ingredient=Value(0, output_field=IntegerField())
+            ).annotate(
                 total_price_per_ingredient=F('quantity') * F('ingredient__price')
             ).aggregate(
                 total_price=Sum('total_price_per_ingredient')
             )['total_price']
-        else:
-            total_price = 0
 
         return "%.2f" %(total_price)
-    
-
 
 
 class RecipeIngredient(models.Model):
