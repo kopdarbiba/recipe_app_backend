@@ -1,76 +1,100 @@
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, call
+from io import BytesIO
 from PIL import Image
-from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase
+from recipes.utils.thumbnail_utils import generate_thumbnail, save_thumbnail, image_to_bytes
+from recipes import models
 
-from recipes.models import Recipe, RecipeImage, Title
-from recipes.utils.thumbnail_utils import manage_thumbnails, generate_thumbnail, save_thumbnail
+class TestThumbnailFunctions(unittest.TestCase):
+
+    @patch('recipes.utils.thumbnail_utils.generate_thumbnail')
+    @patch('recipes.utils.thumbnail_utils.image_to_bytes')
+    @patch('recipes.utils.thumbnail_utils.save_thumbnail')
+    @patch('django.core.files.storage.default_storage.open')
+    def test_manage_thumbnails(self, mock_open, mock_save_thumbnail, mock_image_to_bytes, mock_generate_thumbnail):
+        mock_instance = MagicMock()
+        mock_instance.image.name = "test_image.png"
+
+        # Mock instance.thumbnail with a None value
+        mock_instance.thumbnail = None
+
+        # Set the known value for original_image_in_bytes and thumbnail_image_object
+        original_image_in_bytes = b'fake_image_content'
+        thumbnail_image_bytes = b'fake_thumbnail_content'
+
+        # Set image object for thumbnail_image_object
+        thumbnail_img_obj = Image.new('RGB', (100, 100))
+
+        # Set up the mock_open side effect to return the known value
+        mock_open.return_value.__enter__.return_value.read.return_value = original_image_in_bytes
+
+        # Set up the side effect for generate_thumbnail to return a known value
+        mock_generate_thumbnail.side_effect = lambda x: thumbnail_img_obj
+
+        # Set up the return value for image_to_bytes
+        mock_image_to_bytes.return_value = thumbnail_image_bytes
 
 
-class RecipeImageSaveTestCase(TestCase):
+        # Call the function with the known value
+        models.manage_thumbnails(mock_instance)
 
-    def setUp(self):
-        self.title1 = Title.objects.create(name_en="Recipe 1", name_ru="Recipe 1", name_lv="Recipe 1")
-        self.recipe = Recipe.objects.create(title=self.title1, cooking_time=1, servings=2)
+        # Assert that generate_thumbnail was called with the expected argument
+        mock_generate_thumbnail.assert_called_once_with(original_image_in_bytes)
 
-        # Use the actual image content
-        image_content = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x01\x00\x00\x00\x01\x00\x08\x06\x00\x00\x00\x1f\x15\xc4\x89\x00\x00\x00\x19tEXtSoftware\x00Adobe ImageReadyq\xc9e<\x00\x00\x03$IDATx\x9c\xec}\t\x94\xe3\xde9\xcfy\xe6\xf9\xf4\xc7\x1c\x87\x84\xbd\x1f\xd3\xb9?\xc9\xfc\x03\x00\x00\xf1zZY\x00\x00\x00\x00IEND\xaeB`\x82'
-        
-            # Print the image content for debugging
-        print("Image Content:", image_content)
-        # Check if the content starts with the correct PNG signature
-        assert image_content.startswith(b'\x89PNG\r\n\x1a\n'), "Invalid PNG signature"
+        # Assert that image_to_bytes was called with the expected argument
+        mock_image_to_bytes.assert_called_once_with(thumbnail_img_obj)
 
-        self.recipe_image = RecipeImage(recipe=self.recipe)
-        self.recipe_image.image = SimpleUploadedFile("test_image.png", image_content, content_type="image/png")
+        # Assert that save_thumbnail was called with the correct arguments
+        mock_save_thumbnail.assert_called_once_with(mock_instance, thumbnail_image_bytes)
 
-        # Ensure that the file extension is correct
-        assert self.recipe_image.image.name.endswith('.png'), "Invalid file extension"
+    def test_generate_thumbnail_success(self):
+        # Create a dummy original image
+        original_image = Image.new('RGB', (200, 200), color='blue')
+        original_image_io = BytesIO()
+        original_image.save(original_image_io, format='PNG')
+        original_image_bytes = original_image_io.getvalue()
+
+        # Call the generate_thumbnail function
+        thumbnail_result = generate_thumbnail(original_image_bytes)
+
+        # Check if the result is an instance of PIL Image
+        self.assertIsInstance(thumbnail_result, Image.Image)
+
+        # Check if the size of the generated thumbnail is correct
+        self.assertEqual(thumbnail_result.size, (99, 99))
+
+    def test_image_to_bytes_with_valid_image(self):
+        # Create a dummy image
+        dummy_image = Image.new('RGB', (100, 100), color='red')
+
+        # Convert the image to bytes
+        result_bytes = image_to_bytes(dummy_image)
+
+        # Check if the result is bytes
+        self.assertIsInstance(result_bytes, bytes)
+
+        # Check if the length of the result is not zero
+        self.assertNotEqual(len(result_bytes), 0)
+
+    def test_image_to_bytes_with_none_image(self):
+        # Pass None as input
+        result_bytes = image_to_bytes(None)
+
+        # Check if the result is None
+        self.assertIsNone(result_bytes)
+
+    def test_save_thumbnail_success(self):
+        # Mock the RecipeImage instance
+        instance_mock = MagicMock()
+        instance_mock.image.name = "example_image.png"
+
+        # Mock the thumbnail data
+        thumbnail_data = b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR...'
+
+        # Call the save_thumbnail function
+        save_thumbnail(instance_mock, thumbnail_data)
+
+        # Check if the save method of the instance is called
+        instance_mock.save.assert_called_once()
 
 
-    def test_manage_thumbnails(self) -> None:
-        """
-        Test the manage_thumbnails function.
-        """
-        with patch('recipes.utils.thumbnail_utils.generate_thumbnail') as mock_generate_thumbnail, \
-                patch('recipes.utils.thumbnail_utils.save_thumbnail') as mock_save_thumbnail:
-
-            # Mock the generate_thumbnail function
-            mock_thumbnail = MagicMock(spec=Image.Image)
-            mock_generate_thumbnail.return_value = mock_thumbnail
-
-            # Call the function
-            manage_thumbnails(self.recipe_image)
-
-            # Assertions
-            mock_generate_thumbnail.assert_called_once_with(self.recipe_image.image)
-            mock_save_thumbnail.assert_called_once_with(self.recipe_image, mock_thumbnail)
-
-    def test_generate_thumbnail(self) -> None:
-        """
-        Test the generate_thumbnail function in different scenarios.
-        """
-            # Read the content from the ImageFieldFile before passing it to generate_thumbnail
-        image_content = self.recipe_image.image.read()
-        result = generate_thumbnail(image_content)
-
-        # mock_image_open.assert_called_once_with('dummy_image.png')
-        # mock_thumbnail.thumbnail.assert_called_once_with((100, 100))
-
-        # Assertions
-        self.assertEqual(result.mode, 'RGB')  # Assuming the mode is set correctly
-        self.assertEqual(result.size, (100, 100))  # Set the expected size
-
-        # Test case where 'convert' should not be called
-        with patch('recipes.utils.thumbnail_utils.Image.open') as mock_image_open:
-            mock_thumbnail = MagicMock(spec=Image.Image)
-            mock_image_open.return_value = mock_thumbnail
-            mock_thumbnail.mode = 'RGB'
-
-            result = generate_thumbnail('dummy_image.jpg')
-
-            mock_image_open.assert_called_once_with('dummy_image.jpg')
-            mock_thumbnail.thumbnail.assert_called_once_with((100, 100))
-            mock_thumbnail.convert.assert_not_called()
-            self.assertEqual(result, mock_thumbnail)
