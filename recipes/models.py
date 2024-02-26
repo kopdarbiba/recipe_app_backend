@@ -86,14 +86,6 @@ class CookingMethod(models.Model):
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv}"
 
-class Adjective(models.Model):
-    name_en = models.CharField(max_length=50, unique=True)
-    name_lv = models.CharField(max_length=50, unique=True)
-    name_ru = models.CharField(max_length=50, unique=True)
-
-    def __str__(self) -> str:
-        return f"{self.name_en} | {self.name_lv}"
-    
 class Unit(models.Model):
     name_en = models.CharField(max_length=255, unique=True)
     name_lv = models.CharField(max_length=255, unique=True)
@@ -164,20 +156,6 @@ class CookingStepInstruction(models.Model):
     def __str__(self) -> str:
         return f"{self.name_en}"
     
-class CookingStep(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    step_number = models.PositiveSmallIntegerField()
-    cooking_method = models.ForeignKey(CookingMethod, on_delete=models.CASCADE)
-    recipe_ingredients = models.ManyToManyField(RecipeIngredient)
-    quantity = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    unit = models.ForeignKey(Unit, on_delete=models.CASCADE, null=True, blank=True)
-    adjective_cm = models.ManyToManyField(Adjective, blank=True, related_name='adjective_cm_set')
-    adjective_ri = models.ManyToManyField(Adjective, blank=True, related_name='adjective_ri_set')
-    adjective_alt = models.ManyToManyField(Adjective, blank=True, related_name='adjective_alt_set')
-    
-    def __str__(self) -> str:
-        return f"Cooking Step for {self.recipe} - {self.cooking_method}"
-
 class RecipeImage(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='recipe_images/originals/')

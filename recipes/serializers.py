@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStep, CookingStepInstruction
+from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStepInstruction
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
