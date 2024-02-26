@@ -1,0 +1,13 @@
+{
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": false,
+    "python.testing.pytestPath": "venv/bin/pytest",  // Set the path to your pytest executable
+    "python.testing.cwd": "${workspaceFolder}",    // Set the working directory for running tests
+    "python.testing.autoTestDiscoverOnSaveEnabled": true,  // Enable automatic test discovery on file save
+    // "python.linting.pylintEnabled": true,  // Enable pylint for linting
+    // "python.linting.pylintPath": "path/to/your/pylint",  // Set the path to your pylint executable
+    // "python.linting.enabled": true  // Enable linting
+}

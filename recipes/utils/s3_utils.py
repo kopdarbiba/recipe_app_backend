@@ -3,6 +3,8 @@ import boto3
 from botocore.exceptions import ClientError
 from django.conf import settings
 
+from recipe_project.settings import AWS_STORAGE_BUCKET_NAME
+
 def get_s3_client():
     """Get an S3 client with configured AWS credentials and region"""
     return boto3.client(
@@ -31,6 +33,9 @@ def create_presigned_url(object_name, expiration):
         return response
     except ClientError as e:
         logging.error(e)
+        return None
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
         return None
 
 def delete_from_s3(object_key):

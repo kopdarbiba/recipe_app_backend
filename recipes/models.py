@@ -1,16 +1,9 @@
-import os
 from django.db import models
 from django.db.models import Sum, F
-from PIL import Image
-from decimal import Decimal
-from io import BytesIO
-from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.core.validators import MinValueValidator
-from django.dispatch import receiver
-from django.db.models.signals import pre_delete
 
-from recipes.utils.utilities import create_presigned_url, delete_from_s3
-
+from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
+from recipes.utils.thumbnail_utils import manage_thumbnails
 
 
 class Title(models.Model):
@@ -161,7 +154,6 @@ class RecipeIngredient(models.Model):
     def calculate_price(self):
         return self.quantity * self.ingredient.price
 
-
 class CookingStepInstruction(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='instructions')
     step_number = models.PositiveSmallIntegerField()
@@ -192,13 +184,6 @@ class RecipeImage(models.Model):
     thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True, editable=False)
     is_main_image = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        if self.image and not self.thumbnail:
-            # Generate thumbnail asynchronously using a task queue (e.g., Celery)
-            generate_thumbnail.delay(self.id, self.image.name)
-
     def generate_presigned_url_for_image(self, expiration_time=3600):
         s3_key = self.image.name
         return create_presigned_url(s3_key, expiration_time)
@@ -219,49 +204,9 @@ class RecipeImage(models.Model):
 
         super().delete(*args, **kwargs)
 
-@receiver(pre_delete, sender=RecipeImage)
-def delete_s3_images(sender, instance, **kwargs):
-    # This signal is triggered just before the model instance is deleted
-    # You can use it to delete S3 objects associated with the instance
-    s3_key_image = instance.image.name
-    s3_key_thumbnail = instance.thumbnail.name if instance.thumbnail else None
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Call the original save method
 
-    # Delete the original image and thumbnail
-    delete_from_s3(s3_key_image)
-    if s3_key_thumbnail:
-        delete_from_s3(s3_key_thumbnail)
+        # Generate and save the thumbnail if the image has been changed
+        manage_thumbnails(self)
 
-@receiver(models.signals.post_save, sender=RecipeImage)
-def generate_thumbnail(sender, instance, **kwargs):
-    # Generate thumbnail here and save it to the instance
-    # This can be done asynchronously using a task queue like Celery
-    if instance.image and not instance.thumbnail:
-        # Open the original image using Pillow
-        img = Image.open(instance.image)
-
-        # Create a thumbnail
-        thumbnail_size = (200, 200)  # Adjust the size as needed
-        img.thumbnail(thumbnail_size)
-
-        # Convert the image to RGB mode if it's in RGBA mode
-        if img.mode == 'RGBA':
-            img = img.convert('RGB')
-
-        # Create an in-memory file
-        thumb_io = BytesIO()
-        img.save(thumb_io, format='JPEG')
-
-        # Save the thumbnail to the thumbnail field
-        image_name = os.path.basename(instance.image.name)
-        thumbnail_path = f"thumb_{image_name}"
-        instance.thumbnail.save(
-            thumbnail_path,
-            InMemoryUploadedFile(
-                thumb_io,
-                None,
-                thumbnail_path,
-                'image/jpeg',
-                thumb_io.tell,
-                None
-            )
-        )
