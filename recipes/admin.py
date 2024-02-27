@@ -1,7 +1,6 @@
 from django.contrib import admin
 from django.db.models import Q
-from .models import Recipe, RecipeImage, RecipeIngredient, Unit, Title, Description, Ingredient, CookingMethod, Ingredient, Cuisine, CookingStepInstruction, Occasion
-from .models import CookingStep
+from .models import Recipe, RecipeImage, RecipeIngredient, Unit, Title, Description, Ingredient, Ingredient, Cuisine, CookingStepInstruction, Occasion
 
 
 from django.utils.html import format_html
@@ -57,50 +56,6 @@ class CookingStepInstructionInline(admin.TabularInline):
             'fields': ('step_number', 'name_en', 'name_lv', 'name_ru')
         }),
     )
-
-# Cooking step selector block at end of RecipeAdmin.
-# Filters updates after curent form is saved ( save and continue editing)
-class CookingStepsMethodInline(admin.StackedInline):
-    model = CookingStep
-    extra = 1
-    classes = ["collapse"]
-    list_filter = ('recipe_ingredients',)
-    filter_horizontal = ('recipe_ingredients',)
-    fieldsets = (
-        (None, {
-                'fields': ('step_number', 'cooking_method','recipe_ingredients')
-            }),
-            ('Optional Fields', {
-            'classes': ('collapse',),
-            'fields': ('adjective_cm', 'adjective_ri', 'adjective_alt', 'quantity', 'unit'),
-        }),
-    )
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "cooking_method":
-            # Check if the recipe is being added (not saved yet)
-            if "add" in request.path:
-                kwargs["queryset"] = CookingMethod.objects.none()
-            else:
-                # Filter cooking methods based on the recipe ID
-                recipe_id = request.resolver_match.kwargs.get("object_id")
-                recipe = Recipe.objects.get(pk=recipe_id)
-                kwargs["queryset"] = recipe.cooking_methods.all()
-
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-            
-    def formfield_for_manytomany(self, db_field, request, **kwargs):
-        if db_field.name == "recipe_ingredients":
-            # Check if the recipe is being added (not saved yet)
-            if "add" in request.path:
-                kwargs["queryset"] = RecipeIngredient.objects.none()
-            else:
-                # Filter ingredients based on the recipe ID
-                recipe_id = request.resolver_match.kwargs.get("object_id")
-                if recipe_id:
-                    kwargs["queryset"] = RecipeIngredient.objects.filter(recipe=recipe_id)
-
-        return super().formfield_for_manytomany(db_field, request, **kwargs)
-
     
 # Modify general info form, adding ingredient and cooking steps selectors at botom
 class RecipeAdmin(admin.ModelAdmin):
@@ -108,7 +63,7 @@ class RecipeAdmin(admin.ModelAdmin):
         ("General info", {"fields": ["title", "description", "cuisine", "occasion", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
-    inlines = [RecipeIngredientInline, CookingStepInstructionInline, CookingStepsMethodInline, RecipeImageInline]
+    inlines = [RecipeIngredientInline, CookingStepInstructionInline, RecipeImageInline]
 
     # Filters for each field
     list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')

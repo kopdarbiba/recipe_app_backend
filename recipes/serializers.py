@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStep, CookingStepInstruction
+from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStepInstruction
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
@@ -165,34 +165,4 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return {'equipments': equipment_names}
 
-
-
-
-
-
-
-
-# Curently not used
-class CookingStepSerializer(serializers.ModelSerializer):
-    recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
-    cooking_method = serializers.StringRelatedField()
-    unit = serializers.StringRelatedField()
-    adjective_cm = serializers.StringRelatedField(many=True)
-    adjective_ri = serializers.StringRelatedField(many=True)
-    adjective_alt = serializers.StringRelatedField(many=True)
-
-    class Meta:
-        model = CookingStep
-        fields = [
-            'recipe',
-            'step_number',
-            'cooking_method',
-            'recipe_ingredients',
-            'quantity',
-            'unit',
-            'adjective_cm',
-            'adjective_ri',
-            'adjective_alt',
-        ]
-        
 

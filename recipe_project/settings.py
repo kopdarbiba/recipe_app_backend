@@ -28,7 +28,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['13.49.33.156', 'ec2-13-49-33-156.eu-north-1.compute.amazonaws.com', 'localhost']
+ALLOWED_HOSTS = ['13.49.33.156', 'ec2-13-49-33-156.eu-north-1.compute.amazonaws.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -44,11 +44,13 @@ INSTALLED_APPS = [
     'api',
     'recipes',
     'storages',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -135,9 +137,16 @@ AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
 
+AWS_S3_BUCKET_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/'
+
 
 # Use Amazon S3 for storage for uploaded media files.
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5174",
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
