@@ -1,10 +1,9 @@
 from rest_framework.generics import ListAPIView
 from rest_framework import viewsets
 from rest_framework.response import Response
-from django.db.models import Sum, F, Value, IntegerField, Subquery
+from rest_framework.pagination import PageNumberPagination
 
 from recipes.models import Recipe
-from recipes.models import RecipeIngredient
 from recipes.serializers import RecipeSerializer
 
 
@@ -64,42 +63,63 @@ class RecipesByIngredientView(ListAPIView):
         return Recipe.objects.none()
     
 
-class RecipeByPriceViewSet(viewsets.ModelViewSet):
-    """API endpoint that shows recipes by price
-        accepts GET params 'min' and 'max' (price)
-    """
+class RecipesByPriceView(ListAPIView):
+    """Working APIview endpoint example that return recipes, filtered by price (with pagination).
+    Accepts optional GET params 'min' and 'max' for price.
+    Works at http://localhost:8000/recipes/recipes-by-price/"""
     serializer_class = RecipeSerializer
 
-    def filter_by_price(self, min, max):
-        if (max == None) and (min == 0):
-            return Recipe.objects.all()
-        else:
-            subquery_prices = (
-                RecipeIngredient.objects
-                .values('recipe_id')
-                .annotate(total_price=Sum(F('quantity') * F('ingredient__price')))
-                .order_by('total_price')
-            )
-            if max != None:
-                subquery_filtered_prices = subquery_prices.filter(total_price__range=[min, max])
-            else:
-                subquery_filtered_prices = subquery_prices.filter(total_price__gt=min)
-            return (Recipe.objects.filter(id__in=Subquery(subquery_filtered_prices.values('recipe_id'))).annotate(
-                total_price=Value(0, output_field=IntegerField())).annotate(
-                    total_price=Subquery(subquery_filtered_prices.values('total_price')[:1]))  # Update total_price using the subquery
-            )
-
-    def list(self, request):
+    def get_queryset(self):
         try:
-            min_price = float(request.GET['min']) if 'min' in request.GET else 0
-            max_price = float(request.GET['max']) if 'max' in request.GET else None 
+            min_price = float(self.request.GET['min']) if 'min' in self.request.GET else 0
+            max_price = float(self.request.GET['max']) if 'max' in self.request.GET else None 
         except:
             return Response({'Error': 'price should be numeric'})
         
-        queryset = self.filter_by_price(min_price, max_price)
+        return Recipe.filter_by_price(min_price, max_price).distinct()
+
+
+class RecipesViewSet(viewsets.ModelViewSet):
+    """Working ViewSet endpoint example that returns all of the recipes (with pagination).
+    Works at http://localhost:8000/recipes/recipes-set/"""
+    serializer_class = RecipeSerializer
+    queryset = Recipe.objects.all()
+
+
+class RecipesByPriceViewSet(viewsets.ViewSet):
+    """Working ViewSet endpoint example (with pagination, but without pagination buttons (have no idea, why so)).
+    Accepts optional GET params 'min' and 'max' for price.
+    Works at: http://localhost:8000/recipes/recipes-by-price-set/"""
+
+    def validate_price_params(self):
+        error_msg = None
+        try:
+            min = float(self.request.GET['min']) if 'min' in self.request.GET else 0
+            max = float(self.request.GET['max']) if 'max' in self.request.GET else None 
+        except:
+            min = 0
+            max = None
+            error_msg = {'Error': 'price should be numeric'}
         
-        data = {}
-        if queryset:
-            for item in queryset:
-                data[item.pk] = RecipeSerializer(item, context={'request': request}).data     
-        return Response(data)
+        return min, max, error_msg
+
+    pagination_class = PageNumberPagination
+
+    def list(self, request):
+        min, max, error_msg = self.validate_price_params()
+        if error_msg:
+            return Response(error_msg)
+        
+        queryset = Recipe.filter_by_price(min, max)
+
+        paginator = PageNumberPagination()
+        page = paginator.paginate_queryset(queryset, request=request)
+        if page is not None:
+            serializer = RecipeSerializer(page, many=True, context={'request': request})
+            paginator.template = "rest_framework/pagination/numbers.html" # doesn't help, numbers still don't show
+            return paginator.get_paginated_response(serializer.data)
+        
+        serializer = RecipeSerializer(queryset, many=True, context={'request': request})   
+        return Response(serializer.data)
+
+

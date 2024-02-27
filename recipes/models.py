@@ -1,6 +1,6 @@
 import os
 from django.db import models
-from django.db.models import Sum, F, Value, IntegerField
+from django.db.models import Sum, F, Value, IntegerField, Subquery
 from PIL import Image
 from decimal import Decimal
 from io import BytesIO
@@ -155,6 +155,35 @@ class Recipe(models.Model):
             )['total_price']
 
         return "%.2f" %(total_price)
+    
+    @classmethod
+    def filter_by_price(cls, min_price=0, max_price=None):
+        """Returns recipes in the given price range. Returns alls of them when the price range is not given.
+        TODO fix result ordering issue.
+        """
+        if max_price is None and min_price == 0:
+            return cls.objects.all()
+        else:
+            subquery_prices = (
+                RecipeIngredient.objects
+                .values('recipe_id')
+                .annotate(recipe_price=Sum(F('quantity') * F('ingredient__price')))               
+            )
+            if max_price is not None:
+                subquery_filtered_prices = subquery_prices.filter(recipe_price__range=[min_price, max_price])
+            else:
+                subquery_filtered_prices = subquery_prices.filter(recipe_price__gt=min_price)
+                
+            queryset = cls.objects.filter(
+                id__in=Subquery(subquery_filtered_prices.values('recipe_id'))
+            ).annotate(
+                total_price=Value(0, output_field=IntegerField())
+            ).annotate(
+                total_price=Subquery(subquery_filtered_prices.values('recipe_price')[:1])
+            ).distinct().order_by('total_price') # Ordering doesn't work here because Django having trouble of recognizing 'total_price'
+
+            return queryset
+
 
 
 class RecipeIngredient(models.Model):
