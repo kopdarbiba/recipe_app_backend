@@ -1,50 +1,27 @@
-from decimal import Decimal
 from django.test import TestCase
-from recipes.models import Recipe, RecipeIngredient
+from recipes.tests.factory import RecipeFactory, RecipeIngredientFactory
 
+class RecipeModelTestCase(TestCase):
+    def setUp(self) -> None:
+        self.recipe = RecipeFactory()
 
-# class RecipeModelTestCase(TestCase):
-#     fixtures = ['recipes/fixtures/recipes_data.json']
-#     def setUp(self) -> None:
-#         None
+    def test_recipe_str_representation(self):
+        expected_str = f"model Recipe: {self.recipe.title}"
+        self.assertEqual(str(self.recipe), expected_str)
 
-#     def test_recipe_count(self):
-#         self.assertEqual(Recipe.objects.count(), 11)
+    def test_recipe_total_price_with_no_ingredients(self):
+        total_price = self.recipe.get_recipe_total_price()
+        self.assertEqual(total_price, 0)
 
-#     def test_dietary_preferences_count(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         self.assertEqual(recipe.dietary_preferences.count(), 1)
+    def test_recipe_total_price_with_existing_ingredients(self):
+        recipe_ingredient1 = RecipeIngredientFactory(recipe=self.recipe, quantity=2, ingredient__price=3.50)
+        recipe_ingredient2 = RecipeIngredientFactory(recipe=self.recipe, quantity=1, ingredient__price=2.00)
 
-#     def test_equipment_count(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         self.assertEqual(recipe.equipment.count(), 1)
+        total_price = self.recipe.get_recipe_total_price()
 
-#     def test_cooking_methods_count(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         self.assertEqual(recipe.cooking_methods.count(), 1)
-
-#     def test_recipe_ingredients_count(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         self.assertEqual(recipe.recipe_ingredients.count(), 9)
-
-#     def test_cooking_step_instructions_count(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         self.assertEqual(recipe.instructions.count(), 5)
-
-#     def test_recipe_ingredients_quantity(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         recipe_ingredient = RecipeIngredient.objects.get(recipe=recipe, ingredient__name_en='pork')
-#         self.assertEqual(recipe_ingredient.quantity, 1)
-
-#     def test_recipe_ingredients_unit(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-#         recipe_ingredient = RecipeIngredient.objects.get(recipe=recipe, ingredient__name_en='pork')
-#         self.assertEqual(recipe_ingredient.unit.name_en, 'kilogram (kg)')
-
-#     def test_recipe_price(self):
-#         recipe = Recipe.objects.get(title__name_en='pork meatballs')
-        
-#         # Set the precision to two decimal places for comparison
-#         expected_price = Decimal('14056.76').quantize(Decimal('0.00'))
-
-#         self.assertEqual(recipe.get_price(), expected_price)
+        expected_total_price = (
+            recipe_ingredient1.quantity * recipe_ingredient1.ingredient.price
+        ) + (
+            recipe_ingredient2.quantity * recipe_ingredient2.ingredient.price
+        )
+        self.assertEqual(total_price, expected_total_price)

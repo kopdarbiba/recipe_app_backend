@@ -1,9 +1,8 @@
-import factory
-from factory import Factory, SubFactory, Faker
-from ..models import Recipe, Title, Description, Cuisine, Occasion, Meal, DietaryPreference, Equipment, CookingMethod, IngredientCategory, Allergen, CookingMethod, Unit, Ingredient
+from factory.django import DjangoModelFactory as DMF
+from factory import SubFactory, Faker, post_generation
+from ..models import Recipe, RecipeIngredient, Title, Description, Cuisine, Occasion, Meal, DietaryPreference, Equipment, CookingMethod, IngredientCategory, Allergen, CookingMethod, Unit, Ingredient
 
-# Create factories for related models if needed
-class TitleFactory(Factory):
+class TitleFactory(DMF):
     class Meta:
         model = Title
 
@@ -11,7 +10,7 @@ class TitleFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class DescriptionFactory(Factory):
+class DescriptionFactory(DMF):
     class Meta:
         model = Description
 
@@ -19,7 +18,7 @@ class DescriptionFactory(Factory):
     name_lv = Faker('text', max_nb_chars=3000, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=3000, locale='ru_RU')
 
-class CuisineFactory(Factory):
+class CuisineFactory(DMF):
     class Meta:
         model = Cuisine
 
@@ -27,7 +26,7 @@ class CuisineFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class OccasionFactory(Factory):
+class OccasionFactory(DMF):
     class Meta:
         model = Occasion
 
@@ -35,7 +34,7 @@ class OccasionFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class MealFactory(Factory):
+class MealFactory(DMF):
     class Meta:
         model = Meal
 
@@ -43,7 +42,7 @@ class MealFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class EquipmentFactory(Factory):
+class EquipmentFactory(DMF):
     class Meta:
         model = Equipment
 
@@ -51,7 +50,7 @@ class EquipmentFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class DietaryPreferenceFactory(Factory):
+class DietaryPreferenceFactory(DMF):
     class Meta:
         model = DietaryPreference
 
@@ -59,7 +58,7 @@ class DietaryPreferenceFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class IngredientCategoryFactory(Factory):
+class IngredientCategoryFactory(DMF):
     class Meta:
         model = IngredientCategory
 
@@ -67,7 +66,7 @@ class IngredientCategoryFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class AllergenFactory(Factory):
+class AllergenFactory(DMF):
     class Meta:
         model = Allergen
 
@@ -75,7 +74,7 @@ class AllergenFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class CookingMethodFactory(Factory):
+class CookingMethodFactory(DMF):
     class Meta:
         model = CookingMethod
 
@@ -83,7 +82,7 @@ class CookingMethodFactory(Factory):
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
 
-class UnitFactory(Factory):
+class UnitFactory(DMF):
     class Meta:
         model = Unit
 
@@ -92,7 +91,7 @@ class UnitFactory(Factory):
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
     type_shoping_valid = Faker('boolean')
 
-class IngredientFactory(Factory):
+class IngredientFactory(DMF):
     class Meta:
         model = Ingredient
 
@@ -104,11 +103,10 @@ class IngredientFactory(Factory):
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
     price = Faker('random_decimal', left_digits=4, right_digits=2, positive=True)
 
-class RecipeFactory(Factory):
+class RecipeFactory(DMF):
     class Meta:
         model = Recipe
 
-    # Use SubFactory to create related instances
     title = SubFactory(TitleFactory)
     description = SubFactory(DescriptionFactory)
     cuisine = SubFactory(CuisineFactory)
@@ -120,7 +118,7 @@ class RecipeFactory(Factory):
     servings = Faker('random_int', min=1, max=10)
 
     # ManyToMany fields
-    @factory.post_generation
+    @post_generation
     def dietary_preferences(self, create, extracted, **kwargs):
         if not create:
             return
@@ -129,7 +127,7 @@ class RecipeFactory(Factory):
             for dietary_preference in extracted:
                 self.dietary_preferences.add(dietary_preference)
 
-    @factory.post_generation
+    @post_generation
     def equipment(self, create, extracted, **kwargs):
         if not create:
             return
@@ -138,7 +136,7 @@ class RecipeFactory(Factory):
             for equipment_instance in extracted:
                 self.equipment.add(equipment_instance)
 
-    @factory.post_generation
+    @post_generation
     def cooking_methods(self, create, extracted, **kwargs):
         if not create:
             return
@@ -147,9 +145,11 @@ class RecipeFactory(Factory):
             for cooking_method_instance in extracted:
                 self.cooking_methods.add(cooking_method_instance)
 
-    # Define a sequence for unique titles
-    @classmethod
-    def _create(cls, model_class, *args, **kwargs):
-        title = kwargs.get('title') or f'Test Recipe {cls._meta.seq + 1}'
-        kwargs['title'] = title
-        return super()._create(model_class, *args, **kwargs)
+class RecipeIngredientFactory(DMF):
+    class Meta:
+        model = RecipeIngredient
+
+    recipe = SubFactory(RecipeFactory)  # Assuming RecipeFactory is properly defined
+    ingredient = SubFactory(IngredientFactory)  # Assuming IngredientFactory is properly defined
+    quantity = Faker('random_digit_not_null')
+    unit = SubFactory(UnitFactory)  # Assuming UnitFactory is properly defined
