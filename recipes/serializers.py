@@ -107,6 +107,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'instructions',
             'images',
             'price',
+            'ingredient_count',
         ]
 
     def get_localized_field(self, obj, field_name):

@@ -127,10 +127,15 @@ class Recipe(models.Model):
         """Recipe price as a field for serializer"""
         return self.get_recipe_total_price()
     
+    @property
+    def ingredient_count(self):
+        """Recipe's ingredients count as a field"""
+        return self.recipe_ingredients.count()
+    
     def get_recipe_total_price(self):
         """Calculate the total price based on quantity and ingredient's price"""
         total_price = 0
-        if self.recipe_ingredients:
+        if self.ingredient_count > 0:
             total_price = self.recipe_ingredients.annotate(
                 total_price_per_ingredient=Value(0, output_field=IntegerField())
             ).annotate(

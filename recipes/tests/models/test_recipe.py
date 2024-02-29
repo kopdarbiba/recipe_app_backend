@@ -11,7 +11,7 @@ class RecipeModelTestCase(TestCase):
 
     def test_recipe_total_price_with_no_ingredients(self):
         total_price = self.recipe.get_recipe_total_price()
-        self.assertEqual(total_price, 0)
+        self.assertEqual(total_price, "%.2f" %(0))
 
     def test_recipe_total_price_with_existing_ingredients(self):
         recipe_ingredient1 = RecipeIngredientFactory(recipe=self.recipe, quantity=2, ingredient__price=3.50)
@@ -19,9 +19,9 @@ class RecipeModelTestCase(TestCase):
 
         total_price = self.recipe.get_recipe_total_price()
 
-        expected_total_price = (
+        expected_total_price = "%.2f" %((
             recipe_ingredient1.quantity * recipe_ingredient1.ingredient.price
         ) + (
             recipe_ingredient2.quantity * recipe_ingredient2.ingredient.price
-        )
+        ))
         self.assertEqual(total_price, expected_total_price)
