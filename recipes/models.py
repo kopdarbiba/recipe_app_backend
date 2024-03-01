@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import Sum, F, Value, IntegerField, Subquery
 from django.core.validators import MinValueValidator
@@ -133,7 +134,7 @@ class Recipe(models.Model):
         return self.recipe_ingredients.count()
     
 
-    def get_recipe_total_price(self) -> float:
+    def get_recipe_total_price(self) -> Decimal:
         """
         Calculates the total price of all ingredients in a recipe.
 
@@ -142,7 +143,7 @@ class Recipe(models.Model):
         and then sums up all the prices to get the total price of the recipe.
 
         Returns:
-            float: The total price of the recipe.
+            Decimal: The total price of the recipe.
         """
         # Get all the ingredients related to this recipe
         ingredients = self.recipe_ingredients.all()
@@ -181,8 +182,6 @@ class Recipe(models.Model):
             ).distinct().order_by('total_price') # Ordering doesn't work here because Django having trouble of recognizing 'total_price'
 
             return queryset
-
-
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')

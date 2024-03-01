@@ -1,5 +1,5 @@
 from factory.django import DjangoModelFactory as DMF
-from factory import SubFactory, Faker, post_generation
+from factory import SubFactory, Faker, post_generation, fuzzy
 from ..models import Recipe, RecipeIngredient, Title, Description, Cuisine, Occasion, Meal, DietaryPreference, Equipment, CookingMethod, IngredientCategory, Allergen, CookingMethod, Unit, Ingredient
 
 class TitleFactory(DMF):
@@ -101,7 +101,7 @@ class IngredientFactory(DMF):
     name_en = Faker('text', max_nb_chars=255)
     name_lv = Faker('text', max_nb_chars=255, locale='lv_LV')
     name_ru = Faker('text', max_nb_chars=255, locale='ru_RU')
-    price = Faker('random_decimal', left_digits=4, right_digits=2, positive=True)
+    price = fuzzy.FuzzyDecimal(0.5, 42.7, precision=2)
 
 class RecipeFactory(DMF):
     class Meta:
@@ -151,5 +151,5 @@ class RecipeIngredientFactory(DMF):
 
     recipe = SubFactory(RecipeFactory)  # Assuming RecipeFactory is properly defined
     ingredient = SubFactory(IngredientFactory)  # Assuming IngredientFactory is properly defined
-    quantity = Faker('random_digit_not_null')
+    quantity = fuzzy.FuzzyDecimal(0.1, 10.0, precision=2)
     unit = SubFactory(UnitFactory)  # Assuming UnitFactory is properly defined
