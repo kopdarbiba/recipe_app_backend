@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from django.db.models import Sum, F, Value, IntegerField, Subquery
 from django.core.validators import MinValueValidator
@@ -132,19 +133,27 @@ class Recipe(models.Model):
         """Recipe's ingredients count as a field"""
         return self.recipe_ingredients.count()
     
-    def get_recipe_total_price(self):
-        """Calculate the total price based on quantity and ingredient's price"""
-        total_price = 0
-        if self.ingredient_count > 0:
-            total_price = self.recipe_ingredients.annotate(
-                total_price_per_ingredient=Value(0, output_field=IntegerField())
-            ).annotate(
-                total_price_per_ingredient=F('quantity') * F('ingredient__price')
-            ).aggregate(
-                total_price=Sum('total_price_per_ingredient')
-            )['total_price']
 
-        return "%.2f" %(total_price)
+    def get_recipe_total_price(self) -> Decimal:
+        """
+        Calculates the total price of all ingredients in a recipe.
+
+        This method iterates over all ingredients related to the recipe,
+        calculates the price for each ingredient using its `calculate_price` method,
+        and then sums up all the prices to get the total price of the recipe.
+
+        Returns:
+            Decimal: The total price of the recipe.
+        """
+        # Get all the ingredients related to this recipe
+        ingredients = self.recipe_ingredients.all()
+        
+        # Calculate the price for each ingredient
+        prices = [ingredient.calculate_price() for ingredient in ingredients]
+            
+        return sum(prices)
+
+
     
     @classmethod
     def filter_by_price(cls, min_price=0, max_price=None):
@@ -174,8 +183,6 @@ class Recipe(models.Model):
 
             return queryset
 
-
-
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
@@ -185,7 +192,6 @@ class RecipeIngredient(models.Model):
     def __str__(self) -> str:
         return f"{self.ingredient.name_en}: {self.calculate_price()}"
    
-    # Returns calculated price (quantity x price)
     def calculate_price(self):
         return self.quantity * self.ingredient.price
 
