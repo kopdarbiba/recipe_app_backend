@@ -195,15 +195,24 @@ class RecipeIngredient(models.Model):
     def calculate_price(self):
         return self.quantity * self.ingredient.price
 
+
 class CookingStepInstruction(models.Model):
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='instructions')
-    step_number = models.PositiveSmallIntegerField()
-    name_en = models.TextField(max_length=3000, null=True, blank=True)
-    name_lv = models.TextField(max_length=3000, null=True, blank=True)
-    name_ru = models.TextField(max_length=3000, null=True, blank=True)
+    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='instructions')
+    step_number = models.PositiveIntegerField(null=True, blank=True)
+    name_lv = models.CharField(max_length=3000, null=True, blank=True)
+    name_en = models.CharField(max_length=3000, null=True, blank=True)
+    name_ru = models.CharField(max_length=3000, null=True, blank=True)
 
     def __str__(self) -> str:
         return f"{self.name_en}"
+
+    def save(self, *args, **kwargs):
+        if not self.step_number:
+            # Set step_number based on the count of instructions for the specific recipe
+            self.step_number = CookingStepInstruction.objects.filter(recipe=self.recipe).count() + 1
+        super().save(*args, **kwargs)
+
+
     
 class RecipeImage(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
