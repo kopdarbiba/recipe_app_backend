@@ -2,6 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from decimal import Decimal
 
 from recipes.models import Recipe
 from recipes.serializers import RecipeSerializer
@@ -71,8 +72,8 @@ class RecipesByPriceView(ListAPIView):
 
     def get_queryset(self):
         try:
-            min_price = float(self.request.GET['min']) if 'min' in self.request.GET else 0
-            max_price = float(self.request.GET['max']) if 'max' in self.request.GET else None 
+            min_price = Decimal(self.request.GET['min']) if 'min' in self.request.GET else Decimal('0.00')
+            max_price = Decimal(self.request.GET['max']) if 'max' in self.request.GET else None 
         except:
             return Response({'Error': 'price should be numeric'})
         
@@ -94,10 +95,10 @@ class RecipesByPriceViewSet(viewsets.ViewSet):
     def validate_price_params(self):
         error_msg = None
         try:
-            min = float(self.request.GET['min']) if 'min' in self.request.GET else 0
-            max = float(self.request.GET['max']) if 'max' in self.request.GET else None 
+            min = Decimal(self.request.GET['min']) if 'min' in self.request.GET else Decimal('0.00')
+            max = Decimal(self.request.GET['max']) if 'max' in self.request.GET else None 
         except:
-            min = 0
+            min = Decimal('0.00')
             max = None
             error_msg = {'Error': 'price should be numeric'}
         
