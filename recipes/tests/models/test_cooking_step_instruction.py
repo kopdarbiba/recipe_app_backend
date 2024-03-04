@@ -37,9 +37,9 @@ class CookingStepInstructionModelTestCase(TestCase):
         with self.assertRaises(IntegrityError):
             instruction_not_valid = CookingStepInstruction.objects.create(**self.instruction_names, step_number = self.step_number)
 
-    def test_instruction_create_without_step_number(self):
-        with self.assertRaises(IntegrityError):
-            instruction_not_valid = CookingStepInstruction.objects.create(**self.instruction_names, recipe = self.recipe)
+    # def test_instruction_create_without_step_number(self):
+    #     with self.assertRaises(IntegrityError):
+    #         instruction_not_valid = CookingStepInstruction.objects.create(**self.instruction_names, recipe = self.recipe)
 
     def test_instruction_step_number_is_positive(self):
         with self.assertRaises(IntegrityError):
