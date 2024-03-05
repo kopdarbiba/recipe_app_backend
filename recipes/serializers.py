@@ -78,36 +78,38 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-    cuisine = serializers.SerializerMethodField()
-    occasion = serializers.SerializerMethodField()
-    meal = serializers.SerializerMethodField()
-    dietary_preferences = serializers.SerializerMethodField()
-    equipments = serializers.SerializerMethodField()
-    cooking_methods = serializers.SerializerMethodField()
-    ingredients = RecipeIngredientSerializer(many=True, read_only=True)
-    instructions = CookingStepInstructionSerializer(many=True, read_only=True)
-    images = RecipeImageSerializer(many=True, read_only=True)
+    # description = serializers.SerializerMethodField()
+    # cuisine = serializers.SerializerMethodField()
+    # occasion = serializers.SerializerMethodField()
+    # meal = serializers.SerializerMethodField()
+    # dietary_preferences = serializers.SerializerMethodField()
+    # equipments = serializers.SerializerMethodField()
+    # cooking_methods = serializers.SerializerMethodField()
+    # ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    # instructions = CookingStepInstructionSerializer(many=True, read_only=True)
+    # images = RecipeImageSerializer(many=True, read_only=True)
     # price = serializers.SerializerMethodField(read_only=True)
+    # total_price = serializers.SerializerMethodField()
+    
 
     class Meta:
         model = Recipe
         fields = [
+            'calculated_total_price',
             'title',
-            'description',
-            'cuisine',
-            'occasion',
-            'meal',
             'cooking_time',
-            'servings',
-            'dietary_preferences',
-            'equipments',
-            'cooking_methods',
-            'ingredients',
-            'instructions',
-            'images',
-            'price',
-            'ingredient_count',
+            # 'description',
+            # 'cuisine',
+            # 'occasion',
+            # 'meal',
+            # 'servings',
+            # 'dietary_preferences',
+            # 'equipments',
+            # 'cooking_methods',
+            # 'ingredients',
+            # 'instructions',
+            # 'images',
+            # 'ingredient_count',
         ]
 
     def get_localized_field(self, obj, field_name):
