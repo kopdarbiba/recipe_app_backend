@@ -24,3 +24,10 @@ class RecipeFilter:
             filters['total_price__lte'] = max_price
 
         return queryset.filter(**filters)
+
+    @staticmethod
+    def by_ingredients(queryset, ingredient_ids=None):
+        if ingredient_ids is not None:
+            filters = {'recipe_ingredients__ingredient__id__in': ingredient_ids}
+            return queryset.filter(**filters)
+        return queryset

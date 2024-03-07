@@ -23,14 +23,10 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ['name_en', 'name_lv', 'name_ru']
 
     def to_representation(self, instance):
-        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
 
-        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang = self.context.get('request').query_params.get('lang', 'lv')
         lang_field = f'name_{lang}'
-
-        # Extracting the name using the selected language field
         name = getattr(instance, lang_field, None)
-
         return name
 
 class UnitSerializer(serializers.ModelSerializer):
@@ -39,23 +35,30 @@ class UnitSerializer(serializers.ModelSerializer):
         fields = ['name_en', 'name_lv', 'name_ru']
 
     def to_representation(self, instance):
-        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
-
-        # Dynamically select the appropriate language field based on the 'lang' parameter
+        lang = self.context.get('request').query_params.get('lang', 'lv')
         lang_field = f'name_{lang}'
-
-        # Extracting the name using the selected language field
         name = getattr(instance, lang_field, None)
-
         return name
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
-    ingredient = IngredientSerializer()
-    unit = UnitSerializer()
+    ingredient = IngredientSerializer(many=False)
+    unit = UnitSerializer(many=False)
     
     class Meta:
         model = RecipeIngredient
         fields = ['ingredient', 'quantity', 'unit']
+
+    # def to_representation(self, instance):
+    #     # Print the data before serialization
+    #     print("RecipeIngredient data before serialization:", instance.__dict__)
+
+    #     # Continue with the default serialization
+    #     representation = super().to_representation(instance)
+
+    #     # Print the serialized data
+    #     print("RecipeIngredient serialized data:", representation)
+
+    #     return representation
 
 class CookingStepInstructionSerializer(serializers.ModelSerializer):
     class Meta:
@@ -63,6 +66,7 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
         fields = ['step_number', 'name_en', 'name_lv', 'name_ru']
   
     def to_representation(self, instance):
+
         lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'
 
         # Dynamically select the appropriate language field based on the 'lang' parameter
@@ -75,9 +79,9 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
             'step_number': instance.step_number,
             'name': step_name,
         }
-
+    
 class RecipeSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
+    # title = serializers.SerializerMethodField()
     # description = serializers.SerializerMethodField()
     # cuisine = serializers.SerializerMethodField()
     # occasion = serializers.SerializerMethodField()
@@ -85,19 +89,19 @@ class RecipeSerializer(serializers.ModelSerializer):
     # dietary_preferences = serializers.SerializerMethodField()
     # equipments = serializers.SerializerMethodField()
     # cooking_methods = serializers.SerializerMethodField()
-    # ingredients = RecipeIngredientSerializer(many=True, read_only=True)
-    # instructions = CookingStepInstructionSerializer(many=True, read_only=True)
-    # images = RecipeImageSerializer(many=True, read_only=True)
-    # price = serializers.SerializerMethodField(read_only=True)
-    # total_price = serializers.SerializerMethodField()
+    images = RecipeImageSerializer(many=True, read_only=True)
+    instructions = CookingStepInstructionSerializer(many=True, read_only=True)
+    recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     
 
     class Meta:
         model = Recipe
         fields = [
-            'calculated_total_price',
-            'title',
-            'cooking_time',
+            'instructions',
+            'recipe_ingredients',
+            # 'title',
+            # 'calculated_total_price',
+            # 'cooking_time',
             # 'description',
             # 'cuisine',
             # 'occasion',
@@ -106,10 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             # 'dietary_preferences',
             # 'equipments',
             # 'cooking_methods',
-            # 'ingredients',
-            # 'instructions',
-            # 'images',
-            # 'ingredient_count',
+            'images',
         ]
 
     def get_localized_field(self, obj, field_name):
@@ -167,5 +168,4 @@ class RecipeSerializer(serializers.ModelSerializer):
         equipment_names = [getattr(equipment, lang_field, None) for equipment in equipments]
 
         return {'equipments': equipment_names}
-
 
