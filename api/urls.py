@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from .views import PriceFilterDemoViewSet
+from .views import PriceFilterDemoViewSet, RecipesViewSet
 
 
 router = routers.DefaultRouter()
 router.register(r'price-filter-demo', PriceFilterDemoViewSet)
+router.register(r'', RecipesViewSet)
 
 # Wire up our API using automatic URL routing.
 urlpatterns = [

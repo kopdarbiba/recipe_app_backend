@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import Sum, F, DecimalField
 from django.core.validators import MinValueValidator
 
 from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
@@ -119,19 +118,21 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
+    # class Meta:
+    #     ordering = ['servings']
+    
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
    
-
     @property
     def calculated_total_price(self):
-        ingredients_sum = self.recipe_ingredients.aggregate(
-            total_price=Sum(F('quantity') * F('ingredient__price'), output_field=DecimalField())
-        )['total_price']
+        # Access prefetched related recipe ingredients
+        ingredients_sum = sum(
+            ingredient.quantity * ingredient.ingredient.price for ingredient in self.recipe_ingredients.all()
+        )
 
-        total_price = ingredients_sum if ingredients_sum is not None else 0
+        return ingredients_sum
 
-        return total_price
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
