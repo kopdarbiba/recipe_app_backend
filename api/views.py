@@ -1,9 +1,35 @@
 from rest_framework import viewsets
 from recipes.models import Recipe, RecipeIngredient
 from django.db.models import Prefetch
-from recipes.serializers import RecipeSerializer
+from recipes.serializers import RecipeSerializer, RecipePreviewSerializer
 from .filters import RecipeFilter
 
+# View for returning recipes with minimal basic info: id, title, image(curently all images feched, but only one thumbnail img needed)
+# Use in front page.
+class RecipesViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Recipe.objects.select_related('title').prefetch_related('images').all()
+    serializer_class = RecipePreviewSerializer
+
+# TODO add filtering logic
+class FindByIngredientsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Recipe.objects.select_related(
+            'title', 
+            'description', 
+            'cuisine', 
+            'occasion', 
+            'meal'
+            ).prefetch_related(
+                'images', 
+                'dietary_preferences',
+                'instructions',
+                'cooking_methods',
+                'equipment',
+                Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related('ingredient', 'unit')),
+                ).all()
+    
+    serializer_class = RecipeSerializer
+
+# Example
 class PriceFilterDemoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = RecipeFilter.by_total_price(Recipe.objects.all())
     serializer_class = RecipeSerializer
@@ -24,28 +50,6 @@ class PriceFilterDemoViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = RecipeFilter.by_ingredients(queryset, ingredient_ids)
         
         return queryset
-    
-class RecipesViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Recipe.objects.select_related(
-            'title', 
-            'description', 
-            'cuisine', 
-            'occasion', 
-            'meal'
-            ).prefetch_related(
-                'images', 
-                'dietary_preferences',
-                'instructions',
-                'cooking_methods',
-                'equipment',
-                Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related('ingredient', 'unit')),
-                ).all()
-    
-    serializer_class = RecipeSerializer
-
-
-
-
 
 
 # from django.utils.decorators import method_decorator

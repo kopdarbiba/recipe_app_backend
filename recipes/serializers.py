@@ -97,7 +97,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = [
-            # 'id',
+            'id',
             'title',
             'instructions',
             'description',
@@ -169,4 +169,24 @@ class RecipeSerializer(serializers.ModelSerializer):
         equipment_names = [getattr(equipment, lang_field, None) for equipment in equipment]
 
         return {'equipments': equipment_names}
+
+class RecipePreviewSerializer(serializers.ModelSerializer):
+    title = serializers.SerializerMethodField()
+    images = RecipeImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'title',
+            'images',
+        ]
+
+    def get_localized_field(self, obj, field_name):
+        lang = self.context.get('request').query_params.get('lang', 'lv')  # Assuming default is 'lv'  
+        actual_field_name = f'{field_name}_{lang}'
+        return getattr(obj, actual_field_name, None)
+
+    def get_title(self, obj):
+        return self.get_localized_field(obj.title, 'name')
 
