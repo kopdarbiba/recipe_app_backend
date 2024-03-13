@@ -1,15 +1,28 @@
 from rest_framework import viewsets
-from recipes.models import Recipe, RecipeIngredient
+from recipes.models import Recipe, RecipeImage, RecipeIngredient
 from django.db.models import Prefetch
 from recipes.serializers import RecipeSerializer, RecipePreviewSerializer
 from .filters import RecipeFilter
 
-# View for returning recipes with minimal basic info: id, title, image(curently all images feched, but only one thumbnail img needed)
+# View for returning recipes with minimal basic info: id, title, thumbnail
 # Use in front page.
-class RecipesViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Recipe.objects.select_related('title').prefetch_related('images').all()
-    serializer_class = RecipePreviewSerializer
+class FrontPageRecipesViewSet(viewsets.ReadOnlyModelViewSet):
+    # Define a prefetch queryset for RecipeImage objects
+    imgs = Prefetch('images', queryset=RecipeImage.objects.only('thumbnail', 'recipe_id').filter(is_main_image=True))
+    
+    # Define the base queryset with select_related and prefetch_related
+    queryset = Recipe.objects.select_related('title').prefetch_related(imgs)
+    
+    def get_queryset(self):
+        # Further optimize queryset by selecting only necessary title field based on language
+        queryset = super().get_queryset()
+        lang = self.request.query_params.get('lang', 'lv')
+        queryset = queryset.only(f'title__name_{lang}')
+        return queryset
 
+    serializer_class = RecipePreviewSerializer
+    
+    
 # TODO add filtering logic
 class FindByIngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Recipe.objects.select_related(

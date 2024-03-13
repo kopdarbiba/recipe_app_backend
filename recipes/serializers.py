@@ -170,9 +170,20 @@ class RecipeSerializer(serializers.ModelSerializer):
 
         return {'equipments': equipment_names}
 
+class ThumbOnlyImageSerializer(serializers.ModelSerializer):
+
+  thumbnail_url = serializers.SerializerMethodField()
+
+  class Meta:
+    model = RecipeImage
+    fields = ['thumbnail_url',]
+
+  def get_thumbnail_url(self, obj):
+    return obj.generate_presigned_url_for_thumbnail()
+
 class RecipePreviewSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
-    images = RecipeImageSerializer(many=True, read_only=True)
+    images = ThumbOnlyImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Recipe
