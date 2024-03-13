@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from recipes.models import Recipe, RecipeImage, RecipeIngredient
 from django.db.models import Prefetch
-from recipes.serializers import RecipeSerializer, RecipePreviewSerializer
+from recipes.serializers import RecipeSerializer, FrontPageRecipesSerializer
 from .filters import RecipeFilter
 
 # View for returning recipes with minimal basic info: id, title, thumbnail
@@ -20,7 +20,7 @@ class FrontPageRecipesViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = queryset.only(f'title__name_{lang}')
         return queryset
 
-    serializer_class = RecipePreviewSerializer
+    serializer_class = FrontPageRecipesSerializer
     
     
 # TODO add filtering logic

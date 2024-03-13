@@ -181,7 +181,7 @@ class ThumbOnlyImageSerializer(serializers.ModelSerializer):
   def get_thumbnail_url(self, obj):
     return obj.generate_presigned_url_for_thumbnail()
 
-class RecipePreviewSerializer(serializers.ModelSerializer):
+class FrontPageRecipesSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     images = ThumbOnlyImageSerializer(many=True, read_only=True)
 
