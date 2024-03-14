@@ -1,6 +1,4 @@
-from decimal import Decimal
 from django.db import models
-from django.db.models import Sum, F, Value, IntegerField, Subquery
 from django.core.validators import MinValueValidator
 
 from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
@@ -108,8 +106,6 @@ class Ingredient(models.Model):
     def __str__(self) -> str:
         return f"{self.name_en} | {self.name_lv} | {self.price}"
 
-
-    
 class Recipe(models.Model):
     title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
     description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
@@ -122,74 +118,21 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
+    # class Meta:
+    #     ordering = ['servings']
+    
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
    
     @property
-    def price(self):
-        """Recipe price as a field for serializer"""
-        return self.get_recipe_total_price()
-    
-    @property
-    def ingredient_count(self):
-        """Recipe's ingredients count as a field"""
-        return self.recipe_ingredients.count()
-    
+    def calculated_total_price(self):
+        # Access prefetched related recipe ingredients
+        ingredients_sum = sum(
+            ingredient.quantity * ingredient.ingredient.price for ingredient in self.recipe_ingredients.all()
+        )
 
-    def get_recipe_total_price(self) -> Decimal:
-        """
-        Calculates the total price of all ingredients in a recipe.
+        return ingredients_sum
 
-        This method iterates over all ingredients related to the recipe,
-        calculates the price for each ingredient using its `calculate_price` method,
-        and then sums up all the prices to get the total price of the recipe.
-
-        Returns:
-            Decimal: The total price of the recipe.
-        """
-        # Get all the ingredients related to this recipe
-        ingredients = self.recipe_ingredients.all()
-        
-        # Calculate the price for each ingredient
-        prices = [ingredient.calculate_price() for ingredient in ingredients]
-            
-        return Decimal(sum(prices))
-
-
-    
-    @classmethod
-    def filter_by_price(cls, min_price=Decimal('0.00'), max_price=None):
-        """Returns recipes in the given price range. Returns alls of them when the price range is not given.
-        :param decimal min_price: minimal price in range 
-        :param decimal max_price: maximal price in range 
-        :TODO: fix result ordering issue.
-        """
-        if max_price is None and min_price == Decimal('0.00'):
-            return cls.objects.all()
-        else:
-            subquery_prices = (
-                RecipeIngredient.objects
-                .values('recipe_id')
-                .annotate(recipe_price=Sum(F('quantity') * F('ingredient__price')))               
-            )
-            if max_price is not None:
-                subquery_filtered_prices = subquery_prices.filter(recipe_price__range=[min_price, max_price]).values('recipe_id')
-            else:
-                subquery_filtered_prices = subquery_prices.filter(recipe_price__gte=min_price).values('recipe_id')
-            
-            if min_price == Decimal('0.00') or max_price == Decimal('0.00'): # subquery_prices only has info about recipes with ingredients
-                queryset_zero_priced = cls.objects.filter(recipe_ingredients=None).values('id')
-                subquery_filtered_prices = subquery_filtered_prices.union(queryset_zero_priced)
-
-            queryset = cls.objects.filter(
-                id__in=Subquery(subquery_filtered_prices)
-            ).annotate(
-                total_price=Value(0, output_field=IntegerField())
-            ).annotate(
-                total_price=Subquery(subquery_filtered_prices[:1])
-            ).distinct().order_by('total_price') # Ordering doesn't work here because Django having trouble of recognizing 'total_price'
-
-            return queryset
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
@@ -198,11 +141,7 @@ class RecipeIngredient(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.CASCADE)
 
     def __str__(self) -> str:
-        return f"{self.ingredient.name_en}: {self.calculate_price()}"
-   
-    def calculate_price(self):
-        return Decimal(self.quantity * self.ingredient.price)
-
+        return f"{self.ingredient.name_en}"
 
 class CookingStepInstruction(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='instructions')
@@ -219,8 +158,6 @@ class CookingStepInstruction(models.Model):
             # Set step_number based on the count of instructions for the specific recipe
             self.step_number = CookingStepInstruction.objects.filter(recipe=self.recipe).count() + 1
         super().save(*args, **kwargs)
-
-
     
 class RecipeImage(models.Model):
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE, related_name='images')
