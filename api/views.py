@@ -9,14 +9,19 @@ from recipes.serializers import RecipeSerializer
 class RecipeList(APIView):
     """
     View to list all recipes.
+    Example: http://localhost:8000/api/recipes/?lang=en
     """
 
     def get(self, request):
         """
         Get method to retrieve all recipes.
         """
-        recipes = Recipe.objects.all()
-        serializer = RecipeSerializer(recipes, many=True)
+        # Get the language value from the request
+        lang = request.query_params.get('lang', 'lv')  # Default to 'lv' if language is not provided
+        
+        recipes = Recipe.objects.select_related('title', 'description')
+        serializer = RecipeSerializer(recipes, many=True, context={'lang': lang})
+        
         return Response(serializer.data)
 
 
