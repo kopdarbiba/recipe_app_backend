@@ -1,8 +1,9 @@
 from rest_framework.response import Response
 from django.http import Http404
 from rest_framework.views import APIView
+from django.db.models import Prefetch
 
-from recipes.models import Recipe
+from recipes.models import Recipe, RecipeIngredient
 from recipes.serializers import RecipeSerializer
 
 
@@ -16,13 +17,36 @@ class RecipeList(APIView):
         """
         Get method to retrieve all recipes.
         """
-        lang = request.query_params.get('lang', 'ru')  # Default to 'lv' if language is not provided
-        
-        recipes = Recipe.objects.select_related('title', 'description').prefetch_related('images', 'instructions', 'recipe_ingredients')
+        # Set default language to 'ru' if not provided
+        lang = request.query_params.get('lang', 'ru')
+
+        # Retrieve recipes with related data
+        recipes = Recipe.objects.select_related(
+            'title', 
+            'description',
+            'cuisine',
+            'occasion',
+            'meal'
+        ).prefetch_related(
+            'images', 
+            'instructions', 
+            Prefetch(
+                "recipe_ingredients", 
+                queryset=RecipeIngredient.objects.select_related(
+                    'ingredient', 
+                    'unit',
+                    'ingredient__allergen', 
+                    'ingredient__category'
+                )
+            ),
+            'equipment',
+            'cooking_methods'
+        )
+
+        # Serialize data with the specified language context
         serializer = RecipeSerializer(recipes, many=True, context={'lang': lang})
 
         return Response(serializer.data)
-
 
 class RecipeDetails(APIView):
     """

@@ -100,7 +100,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     cuisine = serializers.SerializerMethodField()
     occasion = serializers.SerializerMethodField()
     meal = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = Recipe
         fields = [
