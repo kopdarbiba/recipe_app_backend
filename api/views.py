@@ -16,12 +16,11 @@ class RecipeList(APIView):
         """
         Get method to retrieve all recipes.
         """
-        # Get the language value from the request
-        lang = request.query_params.get('lang', 'lv')  # Default to 'lv' if language is not provided
+        lang = request.query_params.get('lang', 'ru')  # Default to 'lv' if language is not provided
         
-        recipes = Recipe.objects.select_related('title', 'description')
+        recipes = Recipe.objects.select_related('title', 'description').prefetch_related('images', 'instructions', 'recipe_ingredients')
         serializer = RecipeSerializer(recipes, many=True, context={'lang': lang})
-        
+
         return Response(serializer.data)
 
 
