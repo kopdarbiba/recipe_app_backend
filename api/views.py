@@ -17,8 +17,9 @@ class RecipeList(APIView):
         """
         Get method to retrieve all recipes.
         """
-        # Set default language to 'ru' if not provided
-        lang = request.query_params.get('lang', 'ru')
+        # Set default language to 'lv' if not provided
+        lang = request.query_params.get('lang', 'lv')
+        lang_field_name = f'name_{lang}'
 
         # Retrieve recipes with related data
         recipes = Recipe.objects.select_related(
@@ -44,7 +45,7 @@ class RecipeList(APIView):
         )
 
         # Serialize data with the specified language context
-        serializer = RecipeSerializer(recipes, many=True, context={'lang': lang})
+        serializer = RecipeSerializer(recipes, many=True, context={'lang_field_name': lang_field_name})
 
         return Response(serializer.data)
 

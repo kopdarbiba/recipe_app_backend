@@ -11,22 +11,19 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ['name', 'price', 'allergen', 'category']
 
     def get_name(self, obj) -> str:
-        field_name = f'name_{self.context["lang"]}'
-        return getattr(obj, field_name)
+        return getattr(obj, self.context['lang_field_name'])
     
     def get_allergen(self, obj):
         if not obj.allergen:
             return None
         else:
-            field_name = f'name_{self.context["lang"]}'
-            return getattr(obj.allergen, field_name)
+            return getattr(obj.allergen, self.context['lang_field_name'])
 
     def get_category(self, obj):
         if not obj.category:
             return None
         else:
-            field_name = f'name_{self.context["lang"]}'
-            return getattr(obj.category, field_name)
+            return getattr(obj.category, self.context['lang_field_name'])
 
 class UnitSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -38,8 +35,7 @@ class UnitSerializer(serializers.ModelSerializer):
         if not obj:
             return None
         else:
-            field_name = f'name_{self.context["lang"]}'
-            return getattr(obj, field_name)
+            return getattr(obj, self.context['lang_field_name'])
         
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
@@ -55,8 +51,7 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
         fields = ['step_number', 'instruction']
 
     def get_instruction(self, obj) -> str:
-        field_name = f'name_{self.context["lang"]}'
-        return getattr(obj, field_name)
+        return getattr(obj, self.context['lang_field_name'])
 
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -73,8 +68,7 @@ class EquipmentSerializer(serializers.ModelSerializer):
         if not obj:
             return None
         else:
-            field_name = f'name_{self.context["lang"]}'
-            return getattr(obj, field_name)
+            return getattr(obj, self.context['lang_field_name'])
 
 class CookingMethodSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -86,8 +80,7 @@ class CookingMethodSerializer(serializers.ModelSerializer):
         if not obj:
             return None
         else:
-            field_name = f'name_{self.context["lang"]}'
-            return getattr(obj, field_name)
+            return getattr(obj, self.context['lang_field_name'])
 
 class RecipeSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True)
@@ -121,8 +114,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def fetch_lang(self, obj) -> str:
-        field_name = f'name_{self.context["lang"]}'
-        str_value = getattr(obj, field_name)
+        str_value = getattr(obj, self.context['lang_field_name'])
         return str_value
 
     def get_title(self, obj) -> str:
