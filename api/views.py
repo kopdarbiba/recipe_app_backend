@@ -1,78 +1,61 @@
-from rest_framework import viewsets
-from recipes.models import Recipe, RecipeImage, RecipeIngredient
 from django.db.models import Prefetch
-from recipes.serializers import RecipeSerializer, FrontPageRecipesSerializer
-from .filters import RecipeFilter
+from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
-# View for returning recipes with minimal basic info: id, title, thumbnail
-# Use in front page.
-class FrontPageRecipesViewSet(viewsets.ReadOnlyModelViewSet):
-    # Define a prefetch queryset for RecipeImage objects
-    imgs = Prefetch('images', queryset=RecipeImage.objects.only('thumbnail', 'recipe_id').filter(is_main_image=True))
-    
-    # Define the base queryset with select_related and prefetch_related
-    queryset = Recipe.objects.select_related('title').prefetch_related(imgs)
-    
+from recipes.models import Recipe, RecipeIngredient
+from recipes.serializers import RecipeSerializer
+
+
+class RecipeList(ListAPIView):
+    """
+    View to list all recipes.
+    Example: http://localhost:8000/api/recipes/?lang=en
+    """
+
+    serializer_class = RecipeSerializer
+    pagination_class = PageNumberPagination
+
+
     def get_queryset(self):
-        # Further optimize queryset by selecting only necessary title field based on language
-        queryset = super().get_queryset()
-        lang = self.request.query_params.get('lang', 'lv')
-        queryset = queryset.only(f'title__name_{lang}')
-        return queryset
-
-    serializer_class = FrontPageRecipesSerializer
-    
-    
-# TODO add filtering logic
-class FindByIngredientsViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Recipe.objects.select_related(
+        """
+        Get method to retrieve all recipes.
+        """
+        # Retrieve recipes with related data
+        prefetched_recipe_ingredients = Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related(
+                    'ingredient', 
+                    'unit',
+                    'ingredient__allergen', 
+                    'ingredient__category'
+                )
+            ) 
+        queryset = Recipe.objects.select_related(
             'title', 
-            'description', 
-            'cuisine', 
-            'occasion', 
+            'description',
+            'cuisine',
+            'occasion',
             'meal'
-            ).prefetch_related(
-                'images', 
-                'dietary_preferences',
-                'instructions',
-                'cooking_methods',
-                'equipment',
-                Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related('ingredient', 'unit')),
-                ).all()
-    
-    serializer_class = RecipeSerializer
+        ).prefetch_related(
+            'images', 
+            'instructions', 
+            'equipment',
+            'cooking_methods',
+            prefetched_recipe_ingredients,
+        )
 
-# Example
-class PriceFilterDemoViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = RecipeFilter.by_total_price(Recipe.objects.all())
-    serializer_class = RecipeSerializer
-
-    ordering_fields = ['total_price', 'title', 'cooking_time', 'servings']
-    ordering = ['total_price']
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-
-        # Extract min_price, max_price, and ingredient_ids from query parameters
-        min_price = self.request.query_params.get('min_price')
-        max_price = self.request.query_params.get('max_price')
-        ingredient_ids = self.request.query_params.getlist('ingredient_ids')
-
-        # Apply filters
-        queryset = RecipeFilter.by_price_range(queryset, min_price, max_price)
-        queryset = RecipeFilter.by_ingredients(queryset, ingredient_ids)
-        
         return queryset
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
 
-# from django.utils.decorators import method_decorator
-# from django.views.decorators.cache import cache_page
+        # Set default language to 'lv' if not provided
+        lang = self.request.query_params.get('lang', 'lv')
+        lang_field_name = f'name_{lang}'
 
-    # # GPT recomendation
-    # @method_decorator(cache_page(5))
-    # def list(self, request, *args, **kwargs):
-    #     return super().list(request, *args, **kwargs)
-    
-    # @method_decorator(cache_page(5))
-    # def retrieve(self, request, *args, **kwargs):
-    #     return super().retrieve(request, *args, **kwargs)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'lang_field_name': lang_field_name})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True, context={'lang_field_name': lang_field_name})
+        return Response(serializer.data)
