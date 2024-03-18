@@ -117,6 +117,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'instructions',
             'recipe_ingredients',
             'images',
+            'calculated_total_price',
         ]
 
     def fetch_lang(self, obj) -> str:
