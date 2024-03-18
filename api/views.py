@@ -22,7 +22,14 @@ class RecipeList(APIView):
         lang_field_name = f'name_{lang}'
 
         # Retrieve recipes with related data
-        recipes = Recipe.objects.select_related(
+        prefetched_recipe_ingredients = Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related(
+                    'ingredient', 
+                    'unit',
+                    'ingredient__allergen', 
+                    'ingredient__category'
+                )
+            ) 
+        queryset = Recipe.objects.select_related(
             'title', 
             'description',
             'cuisine',
@@ -31,21 +38,13 @@ class RecipeList(APIView):
         ).prefetch_related(
             'images', 
             'instructions', 
-            Prefetch(
-                "recipe_ingredients", 
-                queryset=RecipeIngredient.objects.select_related(
-                    'ingredient', 
-                    'unit',
-                    'ingredient__allergen', 
-                    'ingredient__category'
-                )
-            ),
             'equipment',
-            'cooking_methods'
+            'cooking_methods',
+            prefetched_recipe_ingredients,
         )
 
         # Serialize data with the specified language context
-        serializer = RecipeSerializer(recipes, many=True, context={'lang_field_name': lang_field_name})
+        serializer = RecipeSerializer(queryset, many=True, context={'lang_field_name': lang_field_name})
 
         return Response(serializer.data)
 
