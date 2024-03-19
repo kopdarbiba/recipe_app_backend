@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 
+from recipes.managers import ReceptesManager
 from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
 from recipes.utils.thumbnail_utils import manage_thumbnails
 
@@ -118,6 +119,7 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
+    receptes_mngr = ReceptesManager()
     # class Meta:
     #     ordering = ['servings']
     
