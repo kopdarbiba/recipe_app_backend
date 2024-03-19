@@ -131,3 +131,25 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_meal(self, obj) -> str:
         return self.fetch_lang(obj.meal)
+
+
+class RecipeMinimalSerializer(serializers.ModelSerializer):
+    instructions = CookingStepInstructionSerializer(many=True)
+    title = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = [
+            'id',
+            'title',
+            'servings',
+            'calculated_total_price',
+            'instructions',
+        ]
+
+    def fetch_lang(self, obj) -> str:
+        str_value = getattr(obj, self.context['lang_field_name'])
+        return str_value
+
+    def get_title(self, obj) -> str:
+        return self.fetch_lang(obj.title)
