@@ -45,18 +45,6 @@ class ReceptesManager(models.Manager):
     def manage_related(self):
         return self.get_queryset().prefetch_and_select_related()
     
-    def filter_by_title(self, title):
-        """
-        Filter recipes by title.
-        
-        Args:
-            title (str): The title to filter by.
-        
-        Returns:
-            QuerySet: A queryset containing recipes filtered by title name_lv.
-        """
-        return self.manage_related().filter(title__name_lv__icontains=title)
-    
     def sort_by_total_price(self):
         """
         Sort recipes by their total price.
@@ -70,8 +58,9 @@ class ReceptesManager(models.Manager):
                 Decimal('0')
             )
         ).order_by('total_price')
-    
+
     def filter_by_price(self, queryset, min_price=None, max_price=None):
+    
         """
         Filter recipes in the given queryset by price range.
         
@@ -90,3 +79,16 @@ class ReceptesManager(models.Manager):
             queryset = queryset.filter(total_price__lte=max_price)
         
         return queryset
+
+    def filter_by_title(self, title):
+        """
+        Filter recipes by title.
+        
+        Args:
+            title (str): The title to filter by.
+        
+        Returns:
+            QuerySet: A queryset containing recipes filtered by title name_lv.
+        """
+        return self.manage_related().filter(title__name_lv__icontains=title)
+    

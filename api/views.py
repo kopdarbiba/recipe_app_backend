@@ -76,7 +76,7 @@ class RecipeFilterList(ListAPIView):
 
     def get_queryset(self):
         # Get the queryset from the manager
-        qs_sorted_recipes = Recipe.receptes_mngr.sort_by_total_price()
+        queryset = Recipe.receptes_mngr.sort_by_total_price()
         
         # Retrieve the min_price and max_price query parameters from the request
         min_price = self.request.query_params.get('min_price')
@@ -86,8 +86,9 @@ class RecipeFilterList(ListAPIView):
         min_price_decimal = Decimal(min_price) if min_price else Decimal('0.00')
         max_price_decimal = Decimal(max_price) if max_price else None
         
-        # Filter sorted recipes by price range
-        queryset = Recipe.receptes_mngr.filter_by_price(qs_sorted_recipes, min_price=min_price_decimal, max_price=max_price_decimal)
+        if min_price_decimal or max_price_decimal:
+            # Filter sorted recipes by price range
+            queryset = Recipe.receptes_mngr.filter_by_price(queryset, min_price=min_price_decimal, max_price=max_price_decimal)
         
         return queryset
 
