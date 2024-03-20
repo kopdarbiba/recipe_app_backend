@@ -119,6 +119,7 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
+    objects = models.Manager() # The default manager.
     receptes_mngr = ReceptesManager()
     # class Meta:
     #     ordering = ['servings']
