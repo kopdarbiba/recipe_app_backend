@@ -61,13 +61,12 @@ class RecipeList(ListAPIView):
         serializer = self.get_serializer(queryset, many=True, context={'lang_field_name': lang_field_name})
         return Response(serializer.data)
 
-class RecipeFilterList(ListAPIView):
+class RecipeSearchAPIView(ListAPIView):
     """
     View to list all recipes.
-    Example: http://localhost:8000/api/recipes/filter/?lang=lv&min_price=999&max_price=8989
+    Example: http://localhost:8000/api/recipes/search/?lang=lv&min_price=999&max_price=8989
     """
 
-    # queryset = Recipe.receptes_mngr.filter_by_title('kotletes')
 
     serializer_class = RecipeMinimalSerializer
     pagination_class = PageNumberPagination
