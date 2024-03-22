@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStepInstruction
-
+from .models import Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, CookingStepInstruction, Cuisine
 
 class RecipeImageSerializer(serializers.ModelSerializer):
 
@@ -80,37 +79,43 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
             'name': step_name,
         }
     
+class CuisineSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cuisine
+        fields = ['id', 'name_en', 'name_lv', 'name_ru']
+
+
 class RecipeSerializer(serializers.ModelSerializer):
-    title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
+    # title = serializers.SerializerMethodField()
+    # description = serializers.SerializerMethodField()
     cuisine = serializers.SerializerMethodField()
-    occasion = serializers.SerializerMethodField()
-    meal = serializers.SerializerMethodField()
-    dietary_preferences = serializers.SerializerMethodField()
-    images = RecipeImageSerializer(many=True, read_only=True)
-    equipment = serializers.SerializerMethodField()
-    cooking_methods = serializers.SerializerMethodField()
-    instructions = CookingStepInstructionSerializer(many=True, read_only=True)
-    recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
+    # occasion = serializers.SerializerMethodField()
+    # meal = serializers.SerializerMethodField()
+    # dietary_preferences = serializers.SerializerMethodField()
+    # images = RecipeImageSerializer(many=True, read_only=True)
+    # equipment = serializers.SerializerMethodField()
+    # cooking_methods = serializers.SerializerMethodField()
+    # instructions = CookingStepInstructionSerializer(many=True, read_only=True)
+    # recipe_ingredients = RecipeIngredientSerializer(many=True, read_only=True)
     
 
     class Meta:
         model = Recipe
         fields = [
             'id',
-            'title',
-            'instructions',
-            'description',
+            # 'title',
+            # 'instructions',
+            # 'description',
             'cuisine',
-            'occasion',
-            'cooking_time',
-            'meal',
-            'servings',
-            'dietary_preferences',
-            'images',
-            'recipe_ingredients',
-            'cooking_methods',
-            'equipment',
+            # 'occasion',
+            # 'cooking_time',
+            # 'meal',
+            # 'servings',
+            # 'dietary_preferences',
+            # 'images',
+            # 'recipe_ingredients',
+            # 'cooking_methods',
+            # 'equipment',
             'calculated_total_price',
         ]
 

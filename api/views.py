@@ -1,8 +1,10 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
+from rest_framework import generics
+from rest_framework.response import Response
 from recipes.models import Recipe, RecipeIngredient
-from django.db.models import Prefetch
 from recipes.serializers import RecipeSerializer, RecipePreviewSerializer
 from .filters import RecipeFilter
+from django.db.models import Prefetch
 
 # View for returning recipes with minimal basic info: id, title, image(curently all images feched, but only one thumbnail img needed)
 # Use in front page.
@@ -63,3 +65,18 @@ class PriceFilterDemoViewSet(viewsets.ReadOnlyModelViewSet):
     # @method_decorator(cache_page(5))
     # def retrieve(self, request, *args, **kwargs):
     #     return super().retrieve(request, *args, **kwargs)
+
+class RecipeByCuisineView(generics.ListAPIView):
+    serializer_class = RecipeSerializer
+
+    def get_queryset(self):
+        cuisine_name = self.kwargs.get('cuisine_name')
+        if cuisine_name:
+            return Recipe.objects.filter(cuisine__name_lv=cuisine_name)
+        else:
+            return Recipe.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
