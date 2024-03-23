@@ -64,38 +64,37 @@ class RecipeList(ListAPIView):
 class RecipeSearchAPIView(ListAPIView):
     """
     View to list all recipes.
-    Example: http://localhost:8000/api/recipes/search/?lang=lv&min_price=999&max_price=8989
+    Example: http://localhost:8000/api/recipes/search/?lang=lv&ordering=total_price&q=šķēles
     """
 
-
+    queryset = Recipe.objects.all()
     serializer_class = RecipeMinimalSerializer
+
     pagination_class = PageNumberPagination
+
     ordering_fields = ['total_price', 'title', 'cooking_time', 'servings']
-    ordering = ['total_price']  # You can remove this line if you want to apply custom ordering
+    ordering = ['total_price']
 
-    def get_queryset(self):
-        # Get the queryset from the manager
-        queryset = Recipe.receptes_mngr.sort_by_total_price()
-        
-        # Retrieve the min_price and max_price query parameters from the request
-        min_price = self.request.query_params.get('min_price')
-        max_price = self.request.query_params.get('max_price')
-        
-        # Convert min_price and max_price to Decimal, with default values if not provided
-        min_price_decimal = Decimal(min_price) if min_price else Decimal('0.00')
-        max_price_decimal = Decimal(max_price) if max_price else None
-        
-        if min_price_decimal or max_price_decimal:
-            # Filter sorted recipes by price range
-            queryset = Recipe.receptes_mngr.filter_by_price(queryset, min_price=min_price_decimal, max_price=max_price_decimal)
-        
-        return queryset
-
+    def get_queryset(self, *args, **kwargs):
+        qs = super().get_queryset(*args, **kwargs)
+        q = self.request.GET.get('q')
+        results = Recipe.objects.none()
+        if q is not None:
+            results = qs.search(q)
+        return results
+    
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
+        # Apply ordering
+        ordering = self.request.GET.get('ordering', None)
+        if ordering in self.ordering_fields:
+            queryset = queryset.order_by(ordering)
+        else:
+            queryset = queryset.order_by(*self.ordering)
+
         # Set default language to 'lv' if not provided
-        lang = self.request.query_params.get('lang', 'lv')
+        lang = self.request.GET.get('lang', 'lv')
         lang_field_name = f'name_{lang}'
 
         page = self.paginate_queryset(queryset)
@@ -105,3 +104,16 @@ class RecipeSearchAPIView(ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True, context={'lang_field_name': lang_field_name})
         return Response(serializer.data)
+
+        
+        # # Retrieve the min_price and max_price query parameters from the request
+        # min_price = self.request.query_params.get('min_price')
+        # max_price = self.request.query_params.get('max_price')
+        
+        # # Convert min_price and max_price to Decimal, with default values if not provided
+        # min_price_decimal = Decimal(min_price) if min_price else Decimal('0.00')
+        # max_price_decimal = Decimal(max_price) if max_price else None
+        
+        # if min_price_decimal or max_price_decimal:
+        #     # Filter sorted recipes by price range
+        #     queryset = Recipe.receptes_mngr.filter_by_price(queryset, min_price=min_price_decimal, max_price=max_price_decimal)
