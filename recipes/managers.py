@@ -37,14 +37,6 @@ class RecipeQuerySet(models.QuerySet):
         # Perform prefetch and select related in a single call
         return self.prefetch_related(*prefetch_lookups).select_related(*select_related_fields)
 
-    def annotate_total_price(self):
-        return self.annotate(
-            total_price=Coalesce(
-                Sum(F('recipe_ingredients__quantity') * F('recipe_ingredients__ingredient__price'), output_field=models.DecimalField()),
-                Decimal('0')
-            )
-        )
-
     def search(self, query):
         """
         Searches for recipes based on the provided query.
@@ -66,7 +58,6 @@ class RecipeQuerySet(models.QuerySet):
 
         qs = (
             self.prefetch_and_select_related()
-            .annotate_total_price()
             .filter(lookup)
         )
         return qs

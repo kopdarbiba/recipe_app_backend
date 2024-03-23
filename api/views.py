@@ -3,6 +3,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from decimal import Decimal
+from django.db.models import Sum, F, DecimalField
+from django.db.models.functions import Coalesce
 
 from recipes.models import Recipe, RecipeIngredient
 from recipes.serializers import RecipeMinimalSerializer, RecipeSerializer
@@ -85,6 +87,13 @@ class RecipeSearchAPIView(ListAPIView):
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+
+        queryset = queryset.annotate(
+            total_price=Coalesce(
+                Sum(F('recipe_ingredients__quantity') * F('recipe_ingredients__ingredient__price'), output_field=DecimalField()),
+                Decimal('0')
+            )
+        )
 
         # Apply ordering
         ordering = self.request.GET.get('ordering', None)
