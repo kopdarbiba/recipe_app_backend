@@ -8,6 +8,7 @@ from django.db.models.functions import Coalesce
 
 from recipes.models import Recipe, RecipeIngredient
 from recipes.serializers import RecipeMinimalSerializer, RecipeSerializer
+from recipes.utils.query_utils import annotate_total_price
 
 
 class RecipeList(ListAPIView):
@@ -87,13 +88,7 @@ class RecipeSearchAPIView(ListAPIView):
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-
-        queryset = queryset.annotate(
-            total_price=Coalesce(
-                Sum(F('recipe_ingredients__quantity') * F('recipe_ingredients__ingredient__price'), output_field=DecimalField()),
-                Decimal('0')
-            )
-        )
+        queryset = annotate_total_price(queryset)
 
         # Apply ordering
         ordering = self.request.GET.get('ordering', None)
