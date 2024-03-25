@@ -2,9 +2,7 @@ from django.db.models import Prefetch
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from decimal import Decimal
-from django.db.models import Sum, F, DecimalField
-from django.db.models.functions import Coalesce
+import django_filters.rest_framework
 
 from recipes.models import Recipe, RecipeIngredient
 from recipes.serializers import RecipeMinimalSerializer, RecipeSerializer
@@ -72,21 +70,21 @@ class RecipeSearchAPIView(ListAPIView):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeMinimalSerializer
-
+    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     pagination_class = PageNumberPagination
-
     ordering_fields = ['total_price', 'title', 'cooking_time', 'servings']
     ordering = ['total_price']
 
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
-        q = self.request.GET.get('q')
+        q = self.request.query_params.get('q')
         queryset = Recipe.objects.none()
         if q is not None:
             queryset = qs.search(q)
 
         # Apply client-side ordering
         ordering_param = self.request.query_params.get('ordering', self.ordering[0])
+
         if ordering_param:
             fields = [field.strip() for field in ordering_param.split(',')]
             # Annotate total price if ordering by total_price provided
@@ -100,7 +98,7 @@ class RecipeSearchAPIView(ListAPIView):
         queryset = self.get_queryset()
 
         # Set default language to 'lv' if not provided
-        lang = self.request.GET.get('lang', 'lv')
+        lang = self.request.query_params.get('lang', 'lv')
         lang_field_name = f'name_{lang}'
 
         page = self.paginate_queryset(queryset)
