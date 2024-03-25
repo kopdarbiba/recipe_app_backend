@@ -81,21 +81,23 @@ class RecipeSearchAPIView(ListAPIView):
     def get_queryset(self, *args, **kwargs):
         qs = super().get_queryset(*args, **kwargs)
         q = self.request.GET.get('q')
-        results = Recipe.objects.none()
+        queryset = Recipe.objects.none()
         if q is not None:
-            results = qs.search(q)
-        return results
+            queryset = qs.search(q)
+
+        # Apply client-side ordering
+        ordering_param = self.request.query_params.get('ordering', self.ordering[0])
+        if ordering_param:
+            fields = [field.strip() for field in ordering_param.split(',')]
+            # Annotate total price if ordering by total_price provided
+            if 'total_price' in fields:
+                queryset = annotate_total_price(queryset)
+            queryset = queryset.order_by(*fields)
+
+        return queryset
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        queryset = annotate_total_price(queryset)
-
-        # Apply ordering
-        ordering = self.request.GET.get('ordering', None)
-        if ordering in self.ordering_fields:
-            queryset = queryset.order_by(ordering)
-        else:
-            queryset = queryset.order_by(*self.ordering)
 
         # Set default language to 'lv' if not provided
         lang = self.request.GET.get('lang', 'lv')

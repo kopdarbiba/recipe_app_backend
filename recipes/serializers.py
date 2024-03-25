@@ -134,7 +134,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeMinimalSerializer(serializers.ModelSerializer):
-    instructions = CookingStepInstructionSerializer(many=True)
+    # instructions = CookingStepInstructionSerializer(many=True)
     title = serializers.SerializerMethodField()
 
     class Meta:
@@ -144,7 +144,7 @@ class RecipeMinimalSerializer(serializers.ModelSerializer):
             'title',
             'servings',
             'calculated_total_price',
-            'instructions',
+            # 'instructions',
         ]
 
     def fetch_lang(self, obj) -> str:
