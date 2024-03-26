@@ -10,21 +10,32 @@ class IngredientSerializer(serializers.ModelSerializer):
         model = Ingredient
         fields = ['name', 'price', 'allergen', 'category']
 
-    def get_name(self, obj) -> str:
-        return getattr(obj, self.context['lang_field_name'])
+    def get_name(self, obj):
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
     
     def get_allergen(self, obj):
-        if not obj.allergen:
-            return None
-        else:
-            return getattr(obj.allergen, self.context['lang_field_name'])
-
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
+        
     def get_category(self, obj):
-        if not obj.category:
-            return None
-        else:
-            return getattr(obj.category, self.context['lang_field_name'])
-
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
 class UnitSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     class Meta:
@@ -32,10 +43,13 @@ class UnitSerializer(serializers.ModelSerializer):
         fields = ['type_shoping_valid', 'name']
 
     def get_name(self, obj):
-        if not obj:
-            return None
-        else:
-            return getattr(obj, self.context['lang_field_name'])
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
         
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     ingredient = IngredientSerializer()
@@ -51,8 +65,14 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
         fields = ['step_number', 'instruction']
 
     def get_instruction(self, obj) -> str:
-        return getattr(obj, self.context['lang_field_name'])
-
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
+        
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = RecipeImage
@@ -65,10 +85,14 @@ class EquipmentSerializer(serializers.ModelSerializer):
         fields = ['name']
     
     def get_name(self, obj):
-        if not obj:
-            return None
-        else:
-            return getattr(obj, self.context['lang_field_name'])
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
+
 
 class CookingMethodSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
@@ -77,10 +101,13 @@ class CookingMethodSerializer(serializers.ModelSerializer):
         fields = ['name']
     
     def get_name(self, obj):
-        if not obj:
-            return None
-        else:
-            return getattr(obj, self.context['lang_field_name'])
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
 
 class RecipeSerializer(serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True)
@@ -114,8 +141,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def fetch_lang(self, obj) -> str:
-        str_value = getattr(obj, self.context['lang_field_name'])
-        return str_value
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
 
     def get_title(self, obj) -> str:
         return self.fetch_lang(obj.title)
@@ -134,22 +166,42 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeMinimalSerializer(serializers.ModelSerializer):
-    instructions = CookingStepInstructionSerializer(many=True)
+    # instructions = CookingStepInstructionSerializer(many=True)
     title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = [
             'id',
             'title',
+            'description',
             'servings',
             'calculated_total_price',
-            'instructions',
+            # 'instructions',
         ]
 
     def fetch_lang(self, obj) -> str:
-        str_value = getattr(obj, self.context['lang_field_name'])
-        return str_value
+        """
+        Fetches the language-specific attribute value from the object.
+        """
+        lang_param = self.context['request'].GET.get('lang')
+        if lang_param:
+            str_value = getattr(obj, lang_param, None)
+            if str_value is not None:
+                return str_value
+        # Return a default value or handle the case where lang_param is not found
+        return ""
 
     def get_title(self, obj) -> str:
+        """
+        Gets the title in the specified language.
+        """
         return self.fetch_lang(obj.title)
+
+    def get_description(self, obj) -> str:
+        """
+        Gets the description in the specified language.
+        """
+        return self.fetch_lang(obj.description)
+    
