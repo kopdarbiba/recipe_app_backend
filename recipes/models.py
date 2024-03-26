@@ -119,7 +119,7 @@ class Recipe(models.Model):
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
-    objects = RecipesManager()
+    # objects = RecipesManager()
     # class Meta:
     #     ordering = ['servings']
  

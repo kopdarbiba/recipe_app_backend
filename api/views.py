@@ -1,66 +1,12 @@
-from django.db.models import Prefetch
 from rest_framework.generics import ListAPIView
-from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-import django_filters.rest_framework
 
-from recipes.models import Recipe, RecipeIngredient
+from recipes.models import Recipe
 from recipes.serializers import RecipeMinimalSerializer, RecipeSerializer
-from recipes.utils.query_utils import annotate_total_price
+from recipes.utils.query_utils import annotate_total_price, get_prefetched_data
 
-
-class RecipeList(ListAPIView):
-    """
-    View to list all recipes.
-    Example: http://localhost:8000/api/recipes/?lang=en
-    """
-
-    serializer_class = RecipeSerializer
-    pagination_class = PageNumberPagination
-
-
-    def get_queryset(self):
-        """
-        Get method to retrieve all recipes.
-        """
-        # Retrieve recipes with related data
-        prefetched_recipe_ingredients = Prefetch("recipe_ingredients", queryset=RecipeIngredient.objects.select_related(
-                    'ingredient', 
-                    'unit',
-                    'ingredient__allergen', 
-                    'ingredient__category'
-                )
-            ) 
-        queryset = Recipe.objects.select_related(
-            'title', 
-            'description',
-            'cuisine',
-            'occasion',
-            'meal'
-        ).prefetch_related(
-            'images', 
-            'instructions', 
-            'equipment',
-            'cooking_methods',
-            prefetched_recipe_ingredients,
-        )
-
-        return queryset
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-
-        # Set default language to 'lv' if not provided
-        lang = self.request.query_params.get('lang', 'lv')
-        lang_field_name = f'name_{lang}'
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'lang_field_name': lang_field_name})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True, context={'lang_field_name': lang_field_name})
-        return Response(serializer.data)
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters
 
 class RecipeSearchAPIView(ListAPIView):
     """
@@ -70,17 +16,24 @@ class RecipeSearchAPIView(ListAPIView):
 
     queryset = Recipe.objects.all()
     serializer_class = RecipeMinimalSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
     pagination_class = PageNumberPagination
     ordering_fields = ['total_price', 'title', 'cooking_time', 'servings']
     ordering = ['total_price']
 
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['id','cooking_time']
+    search_fields = [
+        'title__name_lv', 
+        'title__name_en', 
+        'title__name_ru',
+        'description__name_lv',
+        'description__name_en',
+        'description__name_ru',
+        ]
+
     def get_queryset(self, *args, **kwargs):
-        qs = super().get_queryset(*args, **kwargs)
-        q = self.request.query_params.get('q')
-        queryset = Recipe.objects.none()
-        if q is not None:
-            queryset = qs.search(q)
+        queryset = super().get_queryset(*args, **kwargs)
+        queryset = get_prefetched_data(queryset)
 
         # Apply client-side ordering
         ordering_param = self.request.query_params.get('ordering', self.ordering[0])
@@ -91,33 +44,23 @@ class RecipeSearchAPIView(ListAPIView):
             if 'total_price' in fields:
                 queryset = annotate_total_price(queryset)
             queryset = queryset.order_by(*fields)
-
         return queryset
     
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
 
-        # Set default language to 'lv' if not provided
-        lang = self.request.query_params.get('lang', 'lv')
-        lang_field_name = f'name_{lang}'
+class RecipeList(ListAPIView):
+    """
+    View to list all recipes.
+    Example: http://localhost:8000/api/recipes/?lang=en
+    """
+    queryset = Recipe.objects.all()
+    serializer_class = RecipeSerializer
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'lang_field_name': lang_field_name})
-            return self.get_paginated_response(serializer.data)
+    def get_queryset(self, *args, **kwargs):
+        """
+        Get method to retrieve all recipes.
+        """
+        queryset = super().get_queryset(*args, **kwargs)
+        queryset = get_prefetched_data(queryset)
+        return queryset
 
-        serializer = self.get_serializer(queryset, many=True, context={'lang_field_name': lang_field_name})
-        return Response(serializer.data)
-
-        
-        # # Retrieve the min_price and max_price query parameters from the request
-        # min_price = self.request.query_params.get('min_price')
-        # max_price = self.request.query_params.get('max_price')
-        
-        # # Convert min_price and max_price to Decimal, with default values if not provided
-        # min_price_decimal = Decimal(min_price) if min_price else Decimal('0.00')
-        # max_price_decimal = Decimal(max_price) if max_price else None
-        
-        # if min_price_decimal or max_price_decimal:
-        #     # Filter sorted recipes by price range
-        #     queryset = Recipe.receptes_mngr.filter_by_price(queryset, min_price=min_price_decimal, max_price=max_price_decimal)
