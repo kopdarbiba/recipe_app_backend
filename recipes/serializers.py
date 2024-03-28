@@ -138,6 +138,7 @@ class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
     cuisines = CuisineSerializer(many=True)
     occasions = OccasionSerializer(many=True)
     meals = MealSerializer(many=True)
+    images = ImageSerializer(many=True)        
 
     class Meta:
         model = Recipe
@@ -145,10 +146,11 @@ class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
             'id',
             'title',
             'servings',
-            'calculated_total_price',
             'cuisines',
             'occasions',
             'meals',
+            'images',
+            'calculated_total_price',
         ]
 
 
