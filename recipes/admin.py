@@ -60,21 +60,21 @@ class CookingStepInstructionInline(admin.TabularInline):
 # Modify general info form, adding ingredient and cooking steps selectors at botom
 class RecipeAdmin(admin.ModelAdmin):
     fieldsets = [
-        ("General info", {"fields": ["title", "description", "cuisine", "occasion", "meal", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
+        ("General info", {"fields": ["title", "description", "cuisines", "occasions", "meals", "cooking_time", "servings", "dietary_preferences", "equipment", "cooking_methods"], "classes": ["collapse"]}),
     ]
     
     inlines = [RecipeIngredientInline, CookingStepInstructionInline, RecipeImageInline]
 
     # Filters for each field
-    list_filter = ('dietary_preferences', 'equipment', 'cooking_methods')
-    filter_horizontal = ('dietary_preferences', 'equipment', 'cooking_methods')
+    list_filter = ('cuisines', 'occasions', 'meals', 'dietary_preferences', 'equipment', 'cooking_methods')
+    filter_horizontal = ('cuisines', 'occasions', 'meals','dietary_preferences', 'equipment', 'cooking_methods')
 
     def get_filtered_queryset(self, model_class, request):
         if "add" in request.path:
             return model_class.objects.filter(recipe__isnull=True)
         else:
             recipe_id = request.resolver_match.kwargs.get("object_id")
-            return model_class.objects.filter(Q(recipe__isnull=True) | Q(recipe__id=recipe_id)) # This is pure MAGICK!!! :D
+            return model_class.objects.filter(Q(recipe__isnull=True) | Q(recipe__id=recipe_id))
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "title":
