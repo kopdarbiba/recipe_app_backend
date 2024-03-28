@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import CookingMethod, CookingStepInstruction, Equipment, Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit
+from .models import CookingMethod, CookingStepInstruction, Equipment, Ingredient, Recipe, RecipeImage, RecipeIngredient, Unit, Cuisine, Occasion, Meal
 from recipes.utils.language import LanguageMixin
 
 class IngredientSerializer(LanguageMixin, serializers.ModelSerializer):
@@ -68,6 +68,33 @@ class CookingMethodSerializer(LanguageMixin, serializers.ModelSerializer):
     def get_name(self, obj):
         return self.get_localized_field(obj)
 
+class CuisineSerializer(LanguageMixin, serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = Cuisine
+        fields = ['name']
+
+    def get_name(self, obj):
+        return self.get_localized_field(obj)
+    
+class OccasionSerializer(LanguageMixin, serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = Occasion
+        fields = ['name']
+
+    def get_name(self, obj):
+        return self.get_localized_field(obj)
+
+class MealSerializer(LanguageMixin, serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    class Meta:
+        model = Meal
+        fields = ['name']
+
+    def get_name(self, obj):
+        return self.get_localized_field(obj)
+
 class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     recipe_ingredients = RecipeIngredientSerializer(many=True)
     instructions = CookingStepInstructionSerializer(many=True)
@@ -76,9 +103,9 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     cooking_methods = CookingMethodSerializer(many = True)
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
-    cuisine = serializers.SerializerMethodField()
-    occasion = serializers.SerializerMethodField()
-    meal = serializers.SerializerMethodField()
+    cuisines = CuisineSerializer(many=True)
+    occasions = OccasionSerializer(many=True)
+    meals = MealSerializer(many=True)
 
     class Meta:
         model = Recipe
@@ -86,9 +113,9 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
             'id',
             'title',
             'description',
-            'cuisine',
-            'occasion',
-            'meal',
+            'cuisines',
+            'occasions',
+            'meals',
             'equipment',
             'cooking_methods',
             'servings',
@@ -105,30 +132,23 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     
     def get_description(self, obj) -> str:
         return self.get_localized_field(obj.description)
-        
-    def get_cuisine(self, obj) -> str:
-        return self.get_localized_field(obj.cuisine)
-    
-    def get_occasion(self, obj) -> str:
-        return self.get_localized_field(obj.occasion)
-    
-    def get_meal(self, obj) -> str:
-        return self.get_localized_field(obj.meal)
 
 class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
-    instructions = CookingStepInstructionSerializer(many=True)
     title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
+    cuisines = CuisineSerializer(many=True)
+    occasions = OccasionSerializer(many=True)
+    meals = MealSerializer(many=True)
 
     class Meta:
         model = Recipe
         fields = [
             'id',
             'title',
-            'description',
             'servings',
             'calculated_total_price',
-            'instructions',
+            'cuisines',
+            'occasions',
+            'meals',
         ]
 
 

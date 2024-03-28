@@ -1,9 +1,8 @@
-# utils.py
 from django.db.models import Sum, F, DecimalField
 from django.db.models.functions import Coalesce
+from django.db.models import Prefetch
 from decimal import Decimal
 
-from django.db.models import Prefetch
 from recipes.models import RecipeIngredient
 
 def annotate_total_price(queryset):
@@ -13,7 +12,6 @@ def annotate_total_price(queryset):
                 Decimal('0')
             )
         )
-
 
 def get_prefetched_data(queryset):
     """
@@ -25,16 +23,16 @@ def get_prefetched_data(queryset):
             'ingredient',
             'unit',
             'ingredient__allergen',
-            'ingredient__category'
+            'ingredient__category',
         )
     )
     queryset = queryset.select_related(
         'title',
         'description',
-        'cuisine',
-        'occasion',
-        'meal'
     ).prefetch_related(
+        'cuisines',
+        'occasions',
+        'meals',
         'images',
         'instructions',
         'equipment',

@@ -107,20 +107,19 @@ class Ingredient(models.Model):
         return f"{self.name_en} | {self.name_lv} | {self.price}"
 
 class Recipe(models.Model):
-    title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
-    description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
-    cuisine = models.ForeignKey(Cuisine, on_delete=models.SET_NULL, null=True, blank=True)
-    occasion = models.ForeignKey(Occasion, on_delete=models.SET_NULL, null=True, blank=True)
-    meal = models.ForeignKey(Meal, on_delete=models.SET_NULL, null=True)
     cooking_time = models.PositiveIntegerField()
     servings = models.PositiveIntegerField()
+
+    title = models.OneToOneField(Title, on_delete=models.SET_NULL, null=True)
+    description = models.OneToOneField(Description, on_delete=models.SET_NULL, null=True)
+    
+    cuisines = models.ManyToManyField(Cuisine)
+    occasions = models.ManyToManyField(Occasion)
+    meals = models.ManyToManyField(Meal)
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
     
-    # class Meta:
-    #     ordering = ['servings']
- 
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
    
@@ -132,7 +131,6 @@ class Recipe(models.Model):
         )
 
         return ingredients_sum
-
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
