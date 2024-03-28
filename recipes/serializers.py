@@ -134,19 +134,21 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
         return self.get_localized_field(obj.description)
 
 class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
-    instructions = CookingStepInstructionSerializer(many=True)
     title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
+    cuisines = CuisineSerializer(many=True)
+    occasions = OccasionSerializer(many=True)
+    meals = MealSerializer(many=True)
 
     class Meta:
         model = Recipe
         fields = [
             'id',
             'title',
-            'description',
             'servings',
             'calculated_total_price',
-            'instructions',
+            'cuisines',
+            'occasions',
+            'meals',
         ]
 
 
