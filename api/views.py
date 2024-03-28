@@ -1,7 +1,7 @@
 from rest_framework import viewsets, generics
 from rest_framework import generics
 from rest_framework.response import Response
-from recipes.models import Recipe, RecipeIngredient
+from recipes.models import Recipe, RecipeIngredient, Cuisine
 from recipes.serializers import RecipeSerializer, RecipePreviewSerializer
 from .filters import RecipeFilter
 from django.db.models import Prefetch
@@ -68,15 +68,13 @@ class PriceFilterDemoViewSet(viewsets.ReadOnlyModelViewSet):
 
 class RecipeByCuisineView(generics.ListAPIView):
     serializer_class = RecipeSerializer
-
+        
     def get_queryset(self):
         cuisine_name = self.kwargs.get('cuisine_name')
+        queryset = Recipe.objects.all().select_related('cuisine')
         if cuisine_name:
-            return Recipe.objects.filter(cuisine__name_lv=cuisine_name)
-        else:
-            return Recipe.objects.all()
+            queryset = queryset.filter(cuisine__name_lv=cuisine_name)
+        return queryset
+    
+    
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
