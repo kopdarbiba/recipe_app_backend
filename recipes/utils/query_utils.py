@@ -3,7 +3,7 @@ from django.db.models.functions import Coalesce
 from django.db.models import Prefetch
 from decimal import Decimal
 
-from recipes.models import RecipeIngredient
+from recipes.models import RecipeImage, RecipeIngredient
 
 def annotate_total_price(queryset):
     return queryset.annotate(
@@ -13,7 +13,7 @@ def annotate_total_price(queryset):
             )
         )
 
-def get_prefetched_data(queryset):
+def get_prefetched_data(queryset, main_img_only=False):
     """
     Utility function to prefetch related data for recipes queryset.
     """
@@ -36,11 +36,16 @@ def get_prefetched_data(queryset):
         'cuisines',
         'occasions',
         'meals',
-        'images',
         'instructions',
         'equipment',
         'cooking_methods',
         prefetched_recipe_ingredients,
     )
+
+    # Prefetch main images if main_img_only is True
+    if main_img_only:
+        queryset = queryset.prefetch_related(
+            Prefetch('images', queryset=RecipeImage.objects.filter(is_main_image=True))
+        )
 
     return queryset
