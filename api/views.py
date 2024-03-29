@@ -1,5 +1,6 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 
 from recipes.models import Recipe
 from recipes.serializers import RecipeMinimalSerializer, RecipeSerializer
@@ -39,3 +40,21 @@ class RecipeList(ListAPIView):
         queryset = get_prefetched_data(queryset)
         return queryset
 
+class RecipeDetails(RetrieveAPIView):
+    """
+    Retrieve details of a specific recipe.
+    
+    Example: http://localhost:8000/api/recipes/<id>/
+    """
+
+    serializer_class = RecipeSerializer
+    queryset = Recipe.objects.all()
+
+    def get_object(self):
+        """
+        Retrieve the recipe instance based on the id provided in the URL.
+        """
+        recipe_id = self.kwargs.get('pk')
+        queryset = get_prefetched_data(self.get_queryset())
+        recipe = get_object_or_404(queryset, pk=recipe_id)
+        return recipe
