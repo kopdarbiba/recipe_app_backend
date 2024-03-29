@@ -17,6 +17,7 @@ def get_prefetched_data(queryset):
     """
     Utility function to prefetch related data for recipes queryset.
     """
+    # Define prefetch for recipe ingredients
     prefetched_recipe_ingredients = Prefetch(
         "recipe_ingredients",
         queryset=RecipeIngredient.objects.select_related(
@@ -26,6 +27,8 @@ def get_prefetched_data(queryset):
             'ingredient__category',
         )
     )
+
+    # Prefetch related data for the main queryset
     queryset = queryset.select_related(
         'title',
         'description',
@@ -39,4 +42,5 @@ def get_prefetched_data(queryset):
         'cooking_methods',
         prefetched_recipe_ingredients,
     )
+
     return queryset
