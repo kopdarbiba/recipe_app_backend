@@ -133,13 +133,14 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     def get_description(self, obj) -> str:
         return self.get_localized_field(obj.description)
 
-class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
+class RecipeMinimalSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
     title = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Recipe
         fields = [
+            'url',
             'id',
             'title',
             'images',
@@ -148,14 +149,15 @@ class RecipeMinimalSerializer(LanguageMixin, serializers.ModelSerializer):
 
     def get_title(self, obj):
         return self.get_localized_field(obj.title)
-    
-class RecipeSearchPageSerializer(LanguageMixin, serializers.ModelSerializer):
+
+class RecipeSearchPageSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
     title = serializers.SerializerMethodField()
     images = ImageSerializer(many=True)        
 
     class Meta:
         model = Recipe
         fields = [
+            'url',
             'id',
             'title',
             'cooking_time',
