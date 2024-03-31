@@ -1,4 +1,5 @@
 from django.urls import reverse
+from django.conf import settings
 
 
 
@@ -12,12 +13,11 @@ class ModifyQueryParamsMiddleware:
             return self.get_response(request)
 
         # Modify query parameters for other requests
-        default_lang = 'lv'
         lang = request.GET.get('lang')
         if lang:
             modified_lang = f'name_{lang}'
         else:
-            modified_lang = f'name_{default_lang}'
+            modified_lang = f'name_{settings.DEFAULT_LANGUAGE}'
 
         request.GET = request.GET.copy()
         request.GET['lang'] = lang
