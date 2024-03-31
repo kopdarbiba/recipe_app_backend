@@ -133,38 +133,28 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     def get_description(self, obj) -> str:
         return self.get_localized_field(obj.description)
 
-class RecipeMinimalSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
+class BaseRecipeSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
     title = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, read_only=True)
 
-    class Meta:
-        model = Recipe
-        fields = [
-            'url',
-            'id',
-            'title',
-            'images',
-        ]
-
-
     def get_title(self, obj):
         return self.get_localized_field(obj.title)
 
-class RecipeSearchPageSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
-    title = serializers.SerializerMethodField()
-    images = ImageSerializer(many=True)        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        lang_param = self.context['request'].GET.get('lang')
 
+        if 'url' in data and lang_param:
+            modified_url = data['url'] + f'?lang={lang_param}'
+            data['url'] = modified_url
+        return data
+
+class RecipeMinimalSerializer(BaseRecipeSerializer):
     class Meta:
         model = Recipe
-        fields = [
-            'url',
-            'id',
-            'title',
-            'cooking_time',
-            'calculated_total_price',
-            'images',
-        ]
+        fields = ['url', 'id', 'title', 'images']
 
-
-    def get_title(self, obj):
-        return self.get_localized_field(obj.title)
+class RecipeSearchPageSerializer(BaseRecipeSerializer):
+    class Meta:
+        model = Recipe
+        fields = ['url', 'id', 'title', 'cooking_time', 'calculated_total_price', 'images']

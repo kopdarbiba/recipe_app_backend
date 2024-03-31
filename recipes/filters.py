@@ -1,5 +1,4 @@
 from rest_framework import filters
-from django.db.models import Q, F
 from django.db.models import Q
 
 from recipes.utils.query_utils import annotate_total_price
@@ -84,8 +83,6 @@ class RecipeSearchFilter(filters.BaseFilterBackend):
                 field_lookup |= Q(**{f'{field_name}__{lang_field}__iexact': field_value})
             lookup_params |= field_lookup
         return queryset.filter(lookup_params)
-
-
 
     def filter_by_total_price(self, queryset, min_price, max_price):
         """
