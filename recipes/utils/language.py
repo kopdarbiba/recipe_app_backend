@@ -9,5 +9,5 @@ def get_localized_field(obj, lang_param):
 
 class LanguageMixin:
     def get_localized_field(self, obj):
-        lang_param = self.context['request'].GET.get('lang')
+        lang_param = self.context['request'].GET.get('language')
         return get_localized_field(obj, lang_param)

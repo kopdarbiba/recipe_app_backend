@@ -12,10 +12,16 @@ class ModifyQueryParamsMiddleware:
             return self.get_response(request)
 
         # Modify query parameters for other requests
-        lang = request.GET.get('lang', 'lv')
-        modified_lang = f'name_{lang}'
+        default_lang = 'lv'
+        lang = request.GET.get('lang')
+        if lang:
+            modified_lang = f'name_{lang}'
+        else:
+            modified_lang = f'name_{default_lang}'
+
         request.GET = request.GET.copy()
-        request.GET['lang'] = modified_lang
+        request.GET['lang'] = lang
+        request.GET['language'] = modified_lang
 
         response = self.get_response(request)
         return response
