@@ -49,6 +49,7 @@ class RecipeSearchFilter(filters.BaseFilterBackend):
         occasions = request.query_params.get('occasions')
         meals = request.query_params.get('meals')
         cuisines = request.query_params.get('cuisines')
+        ingredients = request.query_params.get('ingredients')
 
         # Define a helper function to filter by model field
         if occasions:
@@ -57,7 +58,8 @@ class RecipeSearchFilter(filters.BaseFilterBackend):
             queryset = self.filter_by_model_field(queryset, 'meals', meals)
         if cuisines:
             queryset = self.filter_by_model_field(queryset, 'cuisines', cuisines)
-
+        if ingredients:
+            queryset = self.filter_by_model_field(queryset, 'recipe_ingredients__ingredient', ingredients)
         if min_total_price is not None or max_total_price is not None:
             queryset = self.filter_by_total_price(queryset, min_total_price, max_total_price)
 
@@ -76,13 +78,26 @@ class RecipeSearchFilter(filters.BaseFilterBackend):
             The filtered queryset.
         """
         field_values = field_value_list.split(',')  # Split comma-separated values
-        lookup_params = Q()
         for field_value in field_values:
-            field_lookup = Q()
-            for lang_field in ['name_en', 'name_lv', 'name_ru']:
-                field_lookup |= Q(**{f'{field_name}__{lang_field}__iexact': field_value})
-            lookup_params |= field_lookup
-        return queryset.filter(lookup_params)
+            field_lookup = self.filter_field_value(field_name, field_value)
+            queryset = queryset.filter(field_lookup)
+        return queryset
+
+    def filter_field_value(self, field_name, field_value):
+        """
+        Helper function to generate Q objects for filtering field values.
+
+        Args:
+            field_name: The name of the model field.
+            field_value: The value to filter.
+
+        Returns:
+            Q object representing the filter condition.
+        """
+        field_lookup = Q()
+        for lang_field in ['name_en', 'name_lv', 'name_ru']:
+            field_lookup |= Q(**{f'{field_name}__{lang_field}__iexact': field_value})
+        return field_lookup
 
     def filter_by_total_price(self, queryset, min_price, max_price):
         """
