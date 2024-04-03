@@ -105,7 +105,9 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     cuisines = CuisineSerializer(many=True)
     occasions = OccasionSerializer(many=True)
     meals = MealSerializer(many=True)
-    images = ImageSerializer(many=True)        
+    images = ImageSerializer(many=True) 
+    created_time = serializers.SerializerMethodField()      
+    modified_time = serializers.SerializerMethodField()      
 
     class Meta:
         model = Recipe
@@ -113,6 +115,8 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
             'id',
             'title',
             'description',
+            'created_time',
+            'modified_time',
             'cuisines',
             'occasions',
             'meals',
@@ -132,6 +136,12 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     
     def get_description(self, obj) -> str:
         return self.get_localized_field(obj.description)
+    
+    def get_created_time(self, obj):
+        return obj.created_time.strftime("%Y-%m-%d %H:%M:%S %Z")
+    
+    def get_modified_time(self, obj):
+        return obj.modified_time.strftime("%Y-%m-%d %H:%M:%S %Z")
 
 class BaseRecipeSerializer(LanguageMixin, serializers.HyperlinkedModelSerializer):
     title = serializers.SerializerMethodField()

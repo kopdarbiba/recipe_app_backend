@@ -4,6 +4,8 @@ from django.core.validators import MinValueValidator
 from recipes.utils.s3_utils import create_presigned_url, delete_from_s3
 from recipes.utils.thumbnail_utils import manage_thumbnails
 
+from django.utils import timezone
+
 
 class Title(models.Model):
     name_en = models.CharField(max_length=255)
@@ -119,6 +121,8 @@ class Recipe(models.Model):
     dietary_preferences = models.ManyToManyField(DietaryPreference)
     equipment = models.ManyToManyField(Equipment)
     cooking_methods = models.ManyToManyField(CookingMethod, blank=True)
+    created_time = models.DateTimeField()
+    modified_time = models.DateTimeField()
     
     def __str__(self) -> str:
         return f"model Recipe: {self.title}"
@@ -131,6 +135,12 @@ class Recipe(models.Model):
         )
 
         return ingredients_sum
+    
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.created_time = timezone.now()
+        self.modified_time = timezone.now()       
+        super().save(*args, **kwargs)
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='recipe_ingredients')
