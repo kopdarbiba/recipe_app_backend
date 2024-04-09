@@ -22,7 +22,6 @@ class Command(BaseCommand):
             'allergen', 
             'cooking_method',
             'unit', 
-            'adjective',
             'ingredient', 
         ]
         relative_key_path = config('RELATIVE_KEY_PATH')

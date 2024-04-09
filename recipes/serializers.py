@@ -79,10 +79,14 @@ class CookingStepInstructionSerializer(serializers.ModelSerializer):
             'name': step_name,
         }
     
-# class CuisineSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Cuisine
-#         fields = ['id', 'name_en', 'name_lv', 'name_ru']
+class CuisineSerializer(serializers.ModelSerializer):
+    name_en = serializers.CharField()
+    name_lv = serializers.CharField()
+    name_ru = serializers.CharField()
+    
+    class Meta:
+        model = Cuisine
+        fields = ['id', 'name_en', 'name_lv', 'name_ru']
 
 
 class RecipeSerializer(serializers.ModelSerializer):
