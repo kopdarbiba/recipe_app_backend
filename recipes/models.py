@@ -173,6 +173,12 @@ class RecipeImage(models.Model):
     thumbnail = models.ImageField(upload_to='recipe_images/thumbnails/', null=True, blank=True, editable=False)
     is_main_image = models.BooleanField(default=False)
 
+    class Meta:
+        # Ensure there's only one image per recipe with is_main_image=True
+        constraints = [
+            models.UniqueConstraint(fields=['recipe'], condition=models.Q(is_main_image=True), name='unique_main_image')
+        ]
+    
     def generate_presigned_url_for_image(self, expiration_time=3600):
         s3_key = self.image.name
         return create_presigned_url(s3_key, expiration_time)
@@ -194,6 +200,16 @@ class RecipeImage(models.Model):
         super().delete(*args, **kwargs)
 
     def save(self, *args, **kwargs):
+        existing_main_image = RecipeImage.objects.filter(recipe=self.recipe, is_main_image=True).exclude(id=self.id)
+        if self.is_main_image:
+            # If another main image exists, unset it
+            if existing_main_image.exists():
+                existing_main_image.update(is_main_image=False)
+        else:
+            # If there is no main image at all, the uploaded one will be set to main
+            if not existing_main_image.exists():
+               self.is_main_image = True 
+
         super().save(*args, **kwargs)  # Call the original save method
 
         # Generate and save the thumbnail if the image has been changed
