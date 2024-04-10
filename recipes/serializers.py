@@ -46,9 +46,18 @@ class CookingStepInstructionSerializer(LanguageMixin, serializers.ModelSerialize
         return self.get_localized_field(obj)
     
 class ImageSerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField(read_only=True)
+    image_url = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = RecipeImage
-        fields = ['generate_presigned_url_for_thumbnail', 'generate_presigned_url_for_image']
+        fields = ['thumbnail_url', 'image_url']
+    
+    def get_thumbnail_url(self, obj):
+        return obj.generate_presigned_url_for_thumbnail()
+    
+    def get_image_url(self, obj):
+        return obj.generate_presigned_url_for_image()
 
 class EquipmentSerializer(LanguageMixin, serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
