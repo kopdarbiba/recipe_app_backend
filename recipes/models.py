@@ -198,8 +198,12 @@ class RecipeImage(models.Model):
             delete_from_s3(s3_key_thumbnail)
 
         super().delete(*args, **kwargs)
+        
 
-    def save(self, *args, **kwargs):
+    def __set_main_image(self):
+        """This method ensures that there is one and only main image per reciepe. 
+        If there is no main image, the one that is being currently uploaded is set to main.
+        """
         existing_main_image = RecipeImage.objects.filter(recipe=self.recipe, is_main_image=True).exclude(id=self.id)
         if self.is_main_image:
             # If another main image exists, unset it
@@ -210,8 +214,13 @@ class RecipeImage(models.Model):
             if not existing_main_image.exists():
                self.is_main_image = True 
 
+
+    def save(self, *args, **kwargs):
+        self.__set_main_image()
         super().save(*args, **kwargs)  # Call the original save method
 
         # Generate and save the thumbnail if the image has been changed
         manage_thumbnails(self)
+
+
 
