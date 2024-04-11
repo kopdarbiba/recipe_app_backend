@@ -1,4 +1,5 @@
 from factory.django import DjangoModelFactory as DMF
+import factory
 from factory import SubFactory, Faker, post_generation, fuzzy
 from ..models import Recipe, RecipeIngredient, Title, Description, Cuisine, Occasion, Meal, DietaryPreference, Equipment, CookingMethod, IngredientCategory, Allergen, CookingMethod, Unit, Ingredient
 
@@ -109,15 +110,42 @@ class RecipeFactory(DMF):
 
     title = SubFactory(TitleFactory)
     description = SubFactory(DescriptionFactory)
-    cuisine = SubFactory(CuisineFactory)
-    occasion = SubFactory(OccasionFactory)
-    meal = SubFactory(MealFactory)
 
     # Other fields
     cooking_time = Faker('random_int', min=10, max=120)
     servings = Faker('random_int', min=1, max=10)
+    created_time = Faker('date_object')
+    modified_time = Faker('date_object')
+    
 
     # ManyToMany fields
+    @post_generation
+    def cuisines(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for cuisine in extracted:
+                self.cuisines.add(cuisine)
+
+    @post_generation
+    def occasions(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for occasion in extracted:
+                self.occasions.add(occasion)
+
+    @post_generation
+    def meals(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for meal in extracted:
+                self.meals.add(meal)
+
     @post_generation
     def dietary_preferences(self, create, extracted, **kwargs):
         if not create:
@@ -144,6 +172,19 @@ class RecipeFactory(DMF):
         if extracted:
             for cooking_method_instance in extracted:
                 self.cooking_methods.add(cooking_method_instance)
+
+    @post_generation
+    def ingredients(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            for ingredient in extracted:
+                self.ingredients.add(ingredient)
+
+    @factory.lazy_attribute
+    def calculated_total_price(self): 
+        return sum(ingredient.quantity * ingredient.price for ingredient in self.ingredients.all())
 
 class RecipeIngredientFactory(DMF):
     class Meta:
