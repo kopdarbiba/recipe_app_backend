@@ -173,18 +173,6 @@ class RecipeFactory(DMF):
             for cooking_method_instance in extracted:
                 self.cooking_methods.add(cooking_method_instance)
 
-    @post_generation
-    def ingredients(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        if extracted:
-            for ingredient in extracted:
-                self.ingredients.add(ingredient)
-
-    @factory.lazy_attribute
-    def calculated_total_price(self): 
-        return sum(ingredient.quantity * ingredient.price for ingredient in self.ingredients.all())
 
 class RecipeIngredientFactory(DMF):
     class Meta:
