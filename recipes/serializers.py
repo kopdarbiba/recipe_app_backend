@@ -116,7 +116,8 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
     meals = MealSerializer(many=True)
     images = ImageSerializer(many=True) 
     created_time = serializers.SerializerMethodField()      
-    modified_time = serializers.SerializerMethodField()      
+    modified_time = serializers.SerializerMethodField()
+    recipe_price = serializers.SerializerMethodField()      
 
     class Meta:
         model = Recipe
@@ -135,13 +136,16 @@ class RecipeSerializer(LanguageMixin, serializers.ModelSerializer):
             'instructions',
             'recipe_ingredients',
             'cooking_time',
-            'calculated_total_price',
+            'recipe_price',
             'images',
         ]
 
 
     def get_title(self, obj) -> str:
         return self.get_localized_field(obj.title)
+    
+    def get_recipe_price(self, obj):
+        return obj.total_price
     
     def get_description(self, obj) -> str:
         return self.get_localized_field(obj.description)
@@ -174,6 +178,10 @@ class RecipeMinimalSerializer(BaseRecipeSerializer):
         fields = ['url', 'id', 'title', 'images']
 
 class RecipeSearchPageSerializer(BaseRecipeSerializer):
+    recipe_price = serializers.SerializerMethodField()
     class Meta:
         model = Recipe
-        fields = ['url', 'id', 'title', 'cooking_time', 'calculated_total_price', 'images']
+        fields = ['url', 'id', 'title', 'cooking_time', 'recipe_price', 'images']
+
+    def get_recipe_price(self, obj):
+        return obj.total_price

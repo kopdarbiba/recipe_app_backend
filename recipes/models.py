@@ -128,14 +128,14 @@ class Recipe(models.Model):
         return f"model Recipe: {self.title}"
    
     @property
-    def calculated_total_price(self):
+    def total_price(self):
         # Access prefetched related recipe ingredients
         ingredients_sum = sum(
             ingredient.quantity * ingredient.ingredient.price for ingredient in self.recipe_ingredients.all()
         )
 
-        return ingredients_sum
-    
+        return ingredients_sum   
+  
     def save(self, *args, **kwargs):
         if not self.id:
             self.created_time = timezone.now()

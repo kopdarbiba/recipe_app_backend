@@ -11,7 +11,7 @@ from recipes.filters import RecipeOrderingFilter, RecipeSearchFilter
 class RecipeSearchAPIView(ListAPIView):
     """
     View to list all recipes with search ability.
-    Example: http://localhost:8000/api/recipes/search/?lang=lv&ordering=total_price&q=šķēles
+    Example: http://localhost:8000/api/recipes/search/?lang=lv&ordering=recipe_price&q=šķēles
     """
 
     serializer_class = RecipeSearchPageSerializer

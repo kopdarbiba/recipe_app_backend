@@ -4,15 +4,17 @@ from django.db.models import Q
 from recipes.utils.query_utils import annotate_total_price
 
 class RecipeOrderingFilter(filters.OrderingFilter):
+    """Part of the Search filter, that is responsible for ordering.
+    """
     ordering_fields = {
-        'total_price': 'total_price',
+        'recipe_price': 'recipe_price',
         'cooking_time': 'cooking_time',
         'servings': 'servings',
     }
 
     def filter_queryset(self, request, queryset, view):
         ordering = self.get_ordering(request, queryset, view)
-        if ordering and any(field in ordering for field in ['total_price', '-total_price']):
+        if ordering and any(field in ordering for field in ['recipe_price', '-recipe_price']):
             # Annotate the queryset with total_price if ordering by it
             queryset = annotate_total_price(queryset)
         return super().filter_queryset(request, queryset, view)

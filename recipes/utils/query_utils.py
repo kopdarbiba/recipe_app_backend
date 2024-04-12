@@ -6,8 +6,10 @@ from decimal import Decimal
 from recipes.models import RecipeImage, RecipeIngredient
 
 def annotate_total_price(queryset):
+    """Utility function that adds calculated price to a Recipe object for sorting and filtering purpose
+    """
     return queryset.annotate(
-            total_price=Coalesce(
+            recipe_price=Coalesce(
                 Sum(F('recipe_ingredients__quantity') * F('recipe_ingredients__ingredient__price'), output_field=DecimalField()),
                 Decimal('0')
             )

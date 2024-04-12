@@ -14,14 +14,14 @@ class RecipeModelTestCase(TestCase):
         self.assertEqual(str(self.recipe), expected_str)
 
     def test_recipe_total_price_with_no_ingredients(self):
-        total_price = self.recipe.calculated_total_price
+        total_price = self.recipe.total_price
         self.assertEqual(total_price, 0)
 
     def test_recipe_total_price_with_existing_ingredients(self):
         recipe_ingredient1 = RecipeIngredientFactory(recipe=self.recipe, quantity=1, ingredient__price=Decimal('3.53'))
         recipe_ingredient2 = RecipeIngredientFactory(recipe=self.recipe, quantity=1, ingredient__price=Decimal('2.15'))
 
-        total_price = self.recipe.calculated_total_price
+        total_price = self.recipe.total_price
         v1 = recipe_ingredient1.quantity * recipe_ingredient1.ingredient.price
         v2 = recipe_ingredient2.quantity * recipe_ingredient2.ingredient.price
 
@@ -42,7 +42,7 @@ class RecipeModelTestCase(TestCase):
         ]
         for i in range(1,3):
             RecipeIngredientFactory(recipe=three_recipes[i], quantity=i, ingredient__price=self.prices[i]) 
-            self.total_prices[i] = three_recipes[i].calculated_total_price
+            self.total_prices[i] = three_recipes[i].total_price
         return three_recipes
 
 
@@ -53,7 +53,7 @@ class RecipeModelTestCase(TestCase):
         recipe_price = self.prices[1] # 2.00
         RecipeIngredientFactory(recipe=self.recipe, quantity=1, ingredient__price=recipe_price)
 
-        self.assertEqual(recipe_price, self.recipe.calculated_total_price)
+        self.assertEqual(recipe_price, self.recipe.total_price)
     
     
     # def test_recipe_filter_by_price_returns_all_if_price_not_set(self):
